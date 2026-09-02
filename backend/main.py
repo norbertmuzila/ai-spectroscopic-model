@@ -10,6 +10,7 @@ or simply ``python run.py``. The dashboard is served from ``/``.
 from __future__ import annotations
 
 import asyncio
+import hmac
 import json
 import os
 import shutil
@@ -23,6 +24,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from backend import auth as authmod
 from backend import config as cfg_mod
 from backend.db import Database
 from backend.hardware import device as devmod
@@ -39,6 +41,17 @@ ROOT = cfg_mod.ROOT
 app = FastAPI(title="AI Spectroscopic Model", version="1.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"],
                    allow_headers=["*"])
+
+# Inactive unless SPECTRO_PASSWORD is set, which run.py --tunnel does. Registered
+# after CORS so it runs first: an unauthenticated request should be rejected
+# before anything else looks at it.
+app.middleware("http")(authmod.middleware)
+
+
+@app.get("/api/health")
+def health():
+    """Unauthenticated liveness probe, so a tunnel or host can check the app."""
+    return {"ok": True, "service": "spectral-console"}
 
 DB = Database(CFG.resolve("server.database"))
 REPORTS_DIR = CFG.resolve("server.reports_dir")
@@ -570,6 +583,18 @@ async def stream_control(action: str):
 
 @app.websocket("/ws/live")
 async def ws_live(ws: WebSocket):
+    # Authenticate before accepting. Starlette's http middleware does not run
+    # for websocket connections, so without this check the socket is an
+    # unauthenticated side door onto the same live spectra and analysis results
+    # the REST API protects - which matters the moment the console is published
+    # through a tunnel.
+    expected = authmod.password()
+    if expected:
+        supplied = ws.query_params.get("token", "")
+        if not (supplied and hmac.compare_digest(supplied.encode(), expected.encode())):
+            await ws.close(code=1008)      # policy violation
+            return
+
     await ws.accept()
     ST.clients.add(ws)
     try:
@@ -599,4 +624,15 @@ def index():
     path = FRONTEND / "index.html"
     if not path.exists():
         return HTMLResponse("<h1>Frontend not found</h1>", status_code=404)
-    return HTMLResponse(path.read_text(encoding="utf-8"))
+    html = path.read_text(encoding="utf-8")
+
+    # A browser cannot attach an Authorization header to a WebSocket handshake,
+    # so the token travels in the query string instead. Injecting it here is
+    # safe because this response is only produced for a request that already
+    # passed authentication.
+    pw = authmod.password()
+    if pw:
+        tag = '<script src="/static/app.js">'
+        inject = f"<script>window.__SPECTRO_TOKEN__={json.dumps(pw)};</script>"
+        html = html.replace(tag, inject + tag)
+    return HTMLResponse(html)

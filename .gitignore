@@ -18,3 +18,8 @@ data/incoming/*
 .vscode/
 .idea/
 *.log
+
+# tunnel client (55 MB binary, fetched by scripts/fetch_cloudflared.py)
+tools/
+# vendored USB driver package (7 MB, fetched by scripts/fetch_driver.py)
+drivers/

@@ -517,7 +517,12 @@ async function loadMinerals() {
 /* =============================================================== websocket */
 function connectWS() {
   const proto = location.protocol === "https:" ? "wss" : "ws";
-  const ws = new WebSocket(`${proto}://${location.host}/ws/live`);
+  // When the console is published through a tunnel it is password-protected,
+  // and a WebSocket handshake cannot carry an Authorization header - so the
+  // token, injected into the page by the server, rides in the query string.
+  const tok = window.__SPECTRO_TOKEN__;
+  const ws = new WebSocket(
+    `${proto}://${location.host}/ws/live` + (tok ? `?token=${encodeURIComponent(tok)}` : ""));
   const p = $("pill-ws");
   ws.onopen = () => { p.className = "pill ok"; p.querySelector("span").textContent = "socket live"; };
   ws.onclose = () => {
