@@ -149,7 +149,8 @@ def scan_windows_pnp() -> dict:
         "  try { $svc = (Get-PnpDeviceProperty -InstanceId $d.InstanceId "
         "        -KeyName 'DEVPKEY_Device_Service').Data } catch {}"
         "  Write-Output ((@($(if($isPresent){'PRESENT'}else{'GHOST'}), $d.FriendlyName, "
-        "        $d.Status, $svc, $d.InstanceId)) -join '|') }"
+        "        $d.Status, $svc, $d.InstanceId, $d.Problem, $d.ProblemDescription)) "
+        "        -join '|') }"
     )
     text = _run(["powershell", "-NoProfile", "-NonInteractive", "-Command", ps])
     out["checked"] = "<failed" not in text
@@ -161,6 +162,8 @@ def scan_windows_pnp() -> dict:
             "name": parts[1], "status": parts[2],
             "driver_service": parts[3] or None,
             "instance": parts[4],
+            "problem_code": parts[5] if len(parts) > 5 else "",
+            "problem": parts[6] if len(parts) > 6 else "",
         }
         (out["present"] if parts[0] == "PRESENT" else out["ghost"]).append(rec)
     return out
@@ -237,22 +240,46 @@ def diagnose() -> dict:
         ]
 
     elif on_bus == 0 and present > 0:
-        svc = [p for p in pnp["present"] if p.get("driver_service")]
-        verdict = ("Windows sees the spectrometer, but no USB driver is bound to it, "
-                   "so no library can open it.")
+        bound = [p for p in pnp["present"] if p.get("driver_service")]
+        codes = {p.get("problem_code") for p in pnp["present"]}
         severity = "error"
-        steps = [
-            "Run the driver installer:  seabreeze_os_setup   (accept the prompt)",
-            "If that does not bind it, install Zadig from https://zadig.akeo.ie/ , "
-            "choose Options > List All Devices, select 'Ocean Optics USB4000', pick "
-            "WinUSB (or libusb-win32) and click Replace Driver.",
-            "Close SpectraSuite and OceanView first - they claim the device and only "
-            "one process can hold it.",
-        ]
-        if svc:
-            steps.insert(0, f"A driver service is bound ({svc[0]['driver_service']}) but "
-                            f"libusb cannot see the device - it is most likely the vendor "
-                            f"driver. Replace it with WinUSB using Zadig.")
+
+        if bound:
+            # A driver is attached, just not one libusb can use. Almost always
+            # the Ocean Optics vendor driver installed by SpectraSuite.
+            drv = bound[0]["driver_service"]
+            verdict = (f"Windows has bound the '{drv}' driver to the spectrometer, but "
+                       f"libusb cannot use it. seabreeze needs WinUSB, so the driver has "
+                       f"to be replaced.")
+            steps = [
+                "Close SpectraSuite and OceanView first - they hold the device open.",
+                "Install Zadig from https://zadig.akeo.ie/ , choose "
+                "Options > List All Devices, select 'Ocean Optics USB4000' in the "
+                "dropdown, pick WinUSB on the right, and click Replace Driver.",
+                "Then re-run this diagnostic.",
+            ]
+        else:
+            # CM_PROB_FAILED_INSTALL (code 28): enumerated, but no driver at all.
+            # Get-PnpDevice reports the symbolic name, and older builds report the
+            # number, so accept either rather than silently missing the case.
+            code28 = any("FAILED_INSTALL" in c or c.strip() == "28"
+                         for c in codes if c)
+            verdict = ("Windows sees the spectrometer but has bound no driver to it"
+                       + (" (problem code 28, CM_PROB_FAILED_INSTALL)" if code28 else "")
+                       + ", so nothing can open it - not this software, not SpectraSuite.")
+            steps = [
+                "Run INSTALL-DRIVER.bat in the project folder and accept the Windows "
+                "security prompt. It installs OOI_USB4000.inf, which matches "
+                "USB\VID_2457&PID_1022 exactly and binds Microsoft's WinUSB driver.",
+                "Installing a driver needs Administrator rights, which is why the "
+                "dashboard cannot do it for you.",
+                "If Windows rejects the package (its catalog is from 2010 and signed "
+                "with SHA-1), use Zadig from https://zadig.akeo.ie/ instead: "
+                "Options > List All Devices, select 'Ocean Optics USB4000', "
+                "choose WinUSB, click Replace Driver.",
+                "Close SpectraSuite and OceanView before measuring - only one process "
+                "can hold the device.",
+            ]
 
     elif on_bus > 0 and listed == 0:
         names = ", ".join(d["model"] for d in bus["devices"])
