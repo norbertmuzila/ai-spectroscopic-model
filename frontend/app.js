@@ -425,6 +425,16 @@ async function refreshStatus() {
     p.querySelector("span").textContent = st.connected
       ? `${dev.model} · ${dev.serial}` : "disconnected";
 
+    // The wavelength range is a property of the grating in the attached unit,
+    // not a constant - show what the instrument actually reports.
+    const rng = st.engine.instrument_range_nm || [];
+    const sub = $("brand-sub");
+    if (sub && rng.length === 2) {
+      sub.textContent = dev.wavelength_min_nm != null
+        ? `${dev.model || "USB4000"} · detector ${dev.wavelength_min_nm.toFixed(0)}–${dev.wavelength_max_nm.toFixed(0)} nm · analysing ${rng[0].toFixed(0)}–${rng[1].toFixed(0)} nm`
+        : `Ocean Optics USB4000 · analysing ${rng[0].toFixed(0)}–${rng[1].toFixed(0)} nm`;
+    }
+
     const v = st.engine.validation || {};
     const m = $("pill-model");
     m.className = "pill " + (st.engine.model_loaded ? "ok" : "warn");

@@ -13,12 +13,45 @@ You asked for the highest possible accuracy across Martian and terrestrial
 minerals. To deliver that honestly, two facts have to be on the table, because
 they shape everything the software does.
 
-### 1. The USB4000 is a VNIR instrument. Most Mars minerals are diagnosed in SWIR.
+### 1. Your unit is 195–913 nm. Most Mars minerals are diagnosed in SWIR.
 
-The USB4000 uses a Toshiba TCD1304AP silicon CCD. Silicon stops responding past
-about **1100 nm** — this is a property of the semiconductor bandgap, not a
-configuration setting. Depending on your grating and slit, your usable range is
-roughly **350–1000 nm**.
+Measured from the attached instrument (serial `USB4H06117`) rather than assumed:
+**3648 pixels spanning 195.47–912.56 nm at 0.197 nm/pixel.** That is a UV-VIS
+grating, not the 350–1000 nm VNIR configuration this project first assumed, and
+the difference is not cosmetic.
+
+The 912 nm ceiling is a hard optical limit, and a costly one. It sits right on
+top of the Fe²⁺/Fe³⁺ band cluster at 0.92–1.05 µm, so it removes:
+
+| Lost at 912 nm | Their diagnostic band |
+|---|---|
+| maghemite, ferrihydrite, lepidocrocite, schwertmannite | 0.93–0.97 µm |
+| hypersthene, pigeonite | 0.92–0.94 µm |
+| nontronite, chlorite, biotite, glauconite | 0.92 µm Fe³⁺ |
+| Mars dark basaltic sand, lunar mare & highland regolith | 0.92–0.98 µm |
+| **goethite** | 0.92 µm — drops from 100% to 50% coverage |
+| **jarosite** | 67% → 33% coverage |
+
+Counting across the whole 92-mineral library: **fully diagnosable falls from 33
+to 23, and not-diagnosable-at-all rises from 41 to 56.**
+
+What still works well is the visible region — electronic transitions below
+0.9 µm: **hematite** (0.53, 0.86 µm), **enstatite** (0.905 µm, just inside),
+**almandine garnet** (0.505/0.686/0.83 µm), **malachite, azurite, chrysocolla**
+(0.77–0.80 µm Cu²⁺), **native sulfur, cinnabar, realgar, orpiment** (sharp
+absorption edges), and **apatite** (REE lines).
+
+The lower bound is set by your **light source**, not the detector. A
+tungsten-halogen lamp is dark below ~340 nm; a deuterium or xenon source reaches
+further into the UV. Measure it on your own bench:
+
+```bash
+python scripts/calibrate_range.py --write   # lamp on, white standard in place
+python scripts/train.py                     # the model is tied to the grid
+```
+
+Silicon stops responding past about 1100 nm regardless — a property of the
+semiconductor bandgap, not a setting — so no USB4000 reaches SWIR.
 
 Mineral spectroscopy splits cleanly across that boundary:
 
@@ -29,22 +62,21 @@ Mineral spectroscopy splits cleanly across that boundary:
 | Al-OH, Mg-OH, Fe-OH | 2.16–2.35 µm | kaolinite, montmorillonite, nontronite, chlorite, serpentine | no |
 | SO₄, CO₃ combinations | 2.1–2.53 µm | gypsum, kieserite, alunite, calcite, magnesite | no |
 
-So on **your** instrument:
+So on **your** instrument (340–912 nm):
 
-**Strong performance** — hematite, goethite, ferrihydrite, akaganeite,
-lepidocrocite, maghemite, olivine (all compositions), low-Ca pyroxene, garnet,
+**Strong performance** — hematite, nanophase hematite, almandine garnet,
 malachite, azurite, chrysocolla, native sulfur, cinnabar, realgar, orpiment,
-palagonite and Mars dust analogs, lunar regolith maturity. **These cover most
-of the iron mineralogy that defines Martian surface geology** — which is a
-genuinely useful slice of the problem, not a consolation prize.
+apatite, low-Ca pyroxene (enstatite, 0.905 µm), palagonite and Martian bright
+dust. These are the visible-region electronic transitions, and this instrument
+reads them well.
 
-**Partial** — jarosite (Fe³⁺ bands visible, sulfate bands not), nontronite,
-siderite, szomolnokite, chlorite, high-Ca pyroxene (Band I at 1.02 µm sits right
-at the detector edge).
+**Partial** — goethite and akaganeite (0.48 µm band visible, 0.92 µm at the
+ceiling), jarosite (0.43 µm visible, 0.92 and 2.27 µm not), forsterite.
 
-**Not possible** — gypsum, kieserite, epsomite, bassanite, alunite, calcite,
-magnesite, dolomite, kaolinite, montmorillonite, saponite, opal/hydrated silica,
-perchlorates, halite. These have **no diagnostic feature below 1000 nm**.
+**Not possible** — everything diagnosed above 912 nm: all the hydrated phases,
+sulfates, carbonates and clays as before, plus the 0.92–1.05 µm group listed in
+the table above (maghemite, ferrihydrite, nontronite, olivine's main band, all
+high-Ca pyroxene, the regolith analogs).
 
 The engine knows this. Every candidate carries a **diagnostic coverage** score —
 the fraction of that mineral's identifying bands inside your measured range. A

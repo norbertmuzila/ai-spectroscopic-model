@@ -4,12 +4,22 @@
 
 instrument:
   model: "Ocean Optics USB4000"
-  # Physical detector limits of the USB4000 (Toshiba TCD1304AP, 3648 px).
-  # The *usable* range depends on the grating/slit your unit shipped with.
-  # Set these to YOUR unit's calibrated range - the engine uses them to decide
-  # which mineral diagnostics it is even allowed to claim.
-  wavelength_min_nm: 350.0
-  wavelength_max_nm: 1000.0
+  # MEASURED from this unit (serial USB4H06117) on 2026-09-02:
+  #   3648 pixels spanning 195.47 - 912.56 nm, 0.197 nm/pixel.
+  # This is a UV-VIS grating, not the 350-1000 nm VNIR configuration. The
+  # 912 nm ceiling is a hard optical limit and it matters: olivine's 1.05 um
+  # band and high-Ca pyroxene's 1.02 um Band I fall outside it entirely.
+  #
+  # The lower bound is set by your LIGHT SOURCE, not the detector. A
+  # tungsten-halogen lamp gives usable signal from roughly 340 nm; a deuterium
+  # or xenon source reaches down toward 200 nm. Run
+  #     python scripts/calibrate_range.py
+  # with the lamp on and a white standard in place to measure it and write the
+  # real numbers here. The engine also trims each measurement to wherever the
+  # white reference actually has signal, so a wrong value here is conservative
+  # rather than dangerous.
+  wavelength_min_nm: 340.0
+  wavelength_max_nm: 912.0
   detector_pixels: 3648
   default_integration_time_ms: 100
   default_scans_to_average: 10
@@ -31,8 +41,8 @@ instrument:
 
 acquisition:
   # Analysis grid every spectrum is resampled onto (nm).
-  grid_min_nm: 350.0
-  grid_max_nm: 1000.0
+  grid_min_nm: 340.0
+  grid_max_nm: 912.0
   grid_step_nm: 1.0
   # Reference/dark are considered stale after this many minutes.
   reference_ttl_minutes: 30
