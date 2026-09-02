@@ -169,6 +169,19 @@ def scan_windows_pnp() -> dict:
     return out
 
 
+def _dashboard_holds_device(port: int = 8000, timeout: float = 2.0) -> bool:
+    """Is the local dashboard running and currently connected to real hardware?"""
+    import json
+    import urllib.request
+    try:
+        with urllib.request.urlopen(
+                f"http://127.0.0.1:{port}/api/status", timeout=timeout) as r:
+            st = json.loads(r.read().decode("utf-8"))
+        return bool(st.get("connected")) and not st.get("device", {}).get("simulated", True)
+    except Exception:
+        return False
+
+
 def try_open() -> dict:
     """Ask seabreeze itself to enumerate and, if possible, read one spectrum."""
     out = {"listed": [], "opened": None}
@@ -283,14 +296,32 @@ def diagnose() -> dict:
 
     elif on_bus > 0 and listed == 0:
         names = ", ".join(d["model"] for d in bus["devices"])
-        verdict = (f"The device is on the USB bus ({names}) but seabreeze cannot claim it. "
-                   f"Another program is almost certainly holding it open.")
+        # The most likely holder is this project's own dashboard. Only one
+        # process can own a USB4000, so a connected console makes every other
+        # process - including this script - see a device it cannot open. Saying
+        # "another program is holding it" without naming that case sends people
+        # hunting for software they already closed.
+        dashboard = _dashboard_holds_device()
         severity = "error"
-        steps = [
-            "Close SpectraSuite, OceanView and any other Ocean Optics software, then retry.",
-            "If nothing else is running, the bound driver is the vendor one - use Zadig "
-            "to replace it with WinUSB.",
-        ]
+        if dashboard:
+            verdict = (f"The spectrometer ({names}) is working, but the Spectral Console "
+                       f"dashboard already has it open. Only one process can own a "
+                       f"USB4000, so this separate check cannot also open it.")
+            steps = [
+                "Nothing is wrong - the dashboard is connected and using the device.",
+                "To run this diagnostic against the hardware, press Stop on the "
+                "dashboard first, or use the dashboard's own Hardware panel, which "
+                "checks from inside the process that holds the device.",
+            ]
+        else:
+            verdict = (f"The device is on the USB bus ({names}) but seabreeze cannot "
+                       f"claim it. Another program is holding it open.")
+            steps = [
+                "Close SpectraSuite, OceanView, and the Spectral Console dashboard if "
+                "it is running - any of them will hold the device.",
+                "If nothing else is running, the bound driver is the vendor one rather "
+                "than WinUSB - use Zadig to replace it.",
+            ]
 
     else:
         verdict = ("The device is visible but could not be read. "
