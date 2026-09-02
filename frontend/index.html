@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USB4000 Spectral Console</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= HEADER ================= -->
+  <header>
+    <div class="brand">
+      <h1>Spectral Console</h1>
+      <span class="sub">Ocean Optics USB4000 &middot; 350&ndash;1000 nm</span>
+    </div>
+    <span class="pill" id="pill-device"><i class="dot"></i><span>disconnected</span></span>
+    <span class="pill" id="pill-model"><i class="dot"></i><span>model</span></span>
+    <span class="pill" id="pill-ws"><i class="dot"></i><span>socket</span></span>
+    <span class="pill" id="pill-qc"><i class="dot"></i><span>no measurement</span></span>
+  </header>
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+
+    <div class="group">
+      <div class="title">Spectrometer</div>
+      <div class="btn-row" style="margin-bottom:9px">
+        <button id="btn-connect" class="primary">Connect</button>
+        <button id="btn-disconnect" class="ghost" disabled>Stop</button>
+      </div>
+      <div class="field">
+        <label><input type="checkbox" id="chk-sim">Simulator mode (no hardware)</label>
+      </div>
+      <button id="btn-diag" class="wide sm ghost">Run hardware diagnostic</button>
+    </div>
+
+    <div class="group" id="grp-acq">
+      <div class="title">Acquisition</div>
+      <div class="field">
+        <label>Integration time &mdash; <span class="n" id="lbl-int">100</span> ms</label>
+        <input type="range" id="rng-int" min="4" max="2000" step="1" value="100">
+      </div>
+      <div class="field">
+        <label>Scans to average &mdash; <span class="n" id="lbl-scans">10</span></label>
+        <input type="range" id="rng-scans" min="1" max="60" step="1" value="10">
+      </div>
+      <div class="field">
+        <label>Boxcar width &mdash; <span class="n" id="lbl-box">2</span></label>
+        <input type="range" id="rng-box" min="0" max="10" step="1" value="2">
+      </div>
+    </div>
+
+    <div class="group" id="grp-ref">
+      <div class="title">References</div>
+      <div class="btn-row" style="margin-bottom:8px">
+        <button id="btn-dark" class="sm">Take dark</button>
+        <button id="btn-white" class="sm">Take white</button>
+      </div>
+      <dl class="kv">
+        <dt>dark</dt><dd id="ref-dark">not taken</dd>
+        <dt>white</dt><dd id="ref-white">not taken</dd>
+      </dl>
+      <div class="callout" style="margin-top:10px;font-size:11.6px;padding:9px 12px">
+        Take <b>dark</b> with the light path blocked and <b>white</b> on a Spectralon or
+        PTFE standard, both at the <b>same integration time</b> as the sample. A mismatch
+        silently corrupts every reflectance value.
+      </div>
+    </div>
+
+    <div class="group hidden" id="grp-sim">
+      <div class="title">Simulated sample</div>
+      <div class="field"><select id="sel-sample"></select></div>
+      <div class="field">
+        <label>Grain size &mdash; <span class="n" id="lbl-grain">1.0</span>&times;</label>
+        <input type="range" id="rng-grain" min="0.2" max="5" step="0.1" value="1">
+      </div>
+      <div class="field">
+        <label>Weathering &mdash; <span class="n" id="lbl-weather">0</span>%</label>
+        <input type="range" id="rng-weather" min="0" max="80" step="1" value="0">
+      </div>
+      <button id="btn-load" class="wide sm">Load into simulator</button>
+    </div>
+
+    <div class="group">
+      <div class="title">Measure</div>
+      <div class="field">
+        <label>Sample label</label>
+        <input type="text" id="inp-label" placeholder="e.g. Red crust, outcrop 4">
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <textarea id="inp-notes" rows="2" placeholder="location, preparation, observations"></textarea>
+      </div>
+      <button id="btn-measure" class="primary wide" style="padding:11px">Run analysis</button>
+      <div class="btn-row" style="margin-top:7px">
+        <button id="btn-stream" class="sm">Live view</button>
+        <button id="btn-import" class="sm">Import file</button>
+      </div>
+      <input type="file" id="file-input" class="hidden"
+             accept=".txt,.csv,.tsv,.trm,.abs,.dat,.jdx">
+    </div>
+
+    <div class="group">
+      <div class="title">Session</div>
+      <div class="field"><input type="text" id="inp-session" placeholder="Session name"></div>
+      <div class="btn-row">
+        <button id="btn-session" class="sm">Start</button>
+        <button id="btn-session-pdf" class="sm">Session PDF</button>
+      </div>
+      <dl class="kv" style="margin-top:9px">
+        <dt>active</dt><dd id="lbl-session">none</dd>
+        <dt>analyses</dt><dd id="lbl-count">0</dd>
+      </dl>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <main>
+
+    <!-- hardware problem panel: only appears when there is one -->
+    <section class="card hidden" id="hw-card">
+      <div class="card-head">
+        <h2>Hardware</h2><span class="sp"></span>
+        <button id="hw-recheck" class="sm ghost">Re-check</button>
+        <button id="hw-sim" class="sm">Use simulator instead</button>
+      </div>
+      <div class="card-body" id="hw-body"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Reflectance spectrum</h2><span class="sp"></span>
+        <span class="note" id="spec-note">no measurement yet</span>
+      </div>
+      <div class="figure" id="fig1">
+        <svg id="svg1" viewBox="0 0 920 292" width="920" height="292" role="img" aria-label="Reflectance spectrum"></svg>
+        <div class="tip" id="tip1"></div>
+      </div>
+      <div class="legend">
+        <span class="item"><span class="sw" style="border-top-color:var(--s1)"></span>Measured reflectance</span>
+        <span class="item"><span class="sw" style="border-top-color:var(--s-cont);border-top-style:dashed"></span>Convex-hull continuum</span>
+        <span class="item" id="leg-fit"><span class="sw" style="border-top-color:var(--s2)"></span>Unmixing model fit</span>
+        <span class="item hidden" id="leg-live"><span class="sw" style="border-top-color:var(--live)"></span>Live raw counts</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Continuum removed &middot; absorption evidence</h2><span class="sp"></span>
+        <span class="note">band position identifies the mineral; depth tracks abundance</span>
+      </div>
+      <div class="figure" id="fig2">
+        <svg id="svg2" viewBox="0 0 920 248" width="920" height="248" role="img" aria-label="Continuum-removed spectrum"></svg>
+        <div class="tip" id="tip2"></div>
+      </div>
+      <div class="legend">
+        <span class="item"><span class="sw" style="border-top-color:var(--s-cr)"></span>Continuum-removed</span>
+        <span class="item"><span class="sw" style="border-top-color:var(--s2);border-top-width:3px"></span>Band measured here</span>
+        <span class="item"><span class="sw" style="border-top-color:var(--accent);border-top-style:dashed"></span>Where this mineral should absorb</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Identification</h2><span class="sp"></span>
+        <button id="btn-pdf"  class="sm" disabled>PDF report</button>
+        <button id="btn-csv"  class="sm" disabled>CSV</button>
+        <button id="btn-json" class="sm" disabled>JSON</button>
+      </div>
+      <div class="card-body">
+        <div id="res-empty" class="empty">
+          Connect the spectrometer, take dark and white references, then run an analysis.
+        </div>
+        <div id="res-body" class="hidden">
+          <div class="hero">
+            <div class="hero-main">
+              <span id="res-status"></span>
+              <div class="headline" id="res-headline">&mdash;</div>
+              <div class="subline" id="res-sub"></div>
+            </div>
+            <div class="conf">
+              <div class="v" id="res-conf">&mdash;</div>
+              <div class="k">Calibrated confidence</div>
+              <div class="meter"><i id="res-bar" style="width:0%"></i></div>
+              <div class="k" style="margin:9px 0 0" id="pset-k">prediction set</div>
+              <div class="subline" id="pset-v" style="margin-top:2px"></div>
+            </div>
+          </div>
+          <div style="margin-top:15px" id="res-callouts"></div>
+          <h3 style="font-family:var(--mono);font-size:10px;letter-spacing:.11em;
+                     text-transform:uppercase;color:var(--ink-3);margin:18px 0 6px">
+            Interpretation</h3>
+          <ul class="notes" id="res-notes"></ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="cols">
+      <section class="card">
+        <div class="card-head">
+          <h2>Ranked candidates</h2><span class="sp"></span>
+          <span class="note">chip = diagnostic bands in range</span>
+        </div>
+        <div class="card-body"><div class="bars" id="cands"><div class="empty">&mdash;</div></div></div>
+      </section>
+      <section class="card">
+        <div class="card-head">
+          <h2>Modelled composition</h2><span class="sp"></span>
+          <span class="note" id="comp-note"></span>
+        </div>
+        <div class="card-body"><div class="bars" id="comp"><div class="empty">&mdash;</div></div></div>
+      </section>
+    </div>
+
+    <div class="cols">
+      <section class="card">
+        <div class="card-head"><h2>Measured absorption bands</h2></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Centre</th><th class="num">Depth</th>
+              <th class="num">Width</th><th class="num">Asymmetry</th>
+            </tr></thead>
+            <tbody id="bands"><tr><td colspan="4" class="empty">&mdash;</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-head">
+          <h2>History</h2><span class="sp"></span>
+          <button id="btn-refresh" class="sm ghost">Refresh</button>
+        </div>
+        <div class="history" id="history"><div class="empty">No analyses yet</div></div>
+      </section>
+    </div>
+
+    <section class="card">
+      <div class="card-head"><h2>What this instrument can and cannot decide</h2></div>
+      <div class="card-body">
+        <div id="audit-callout"></div>
+        <div class="cols" style="gap:16px;margin-top:12px">
+          <dl class="kv" id="audit-kv"></dl>
+          <div id="audit-blind"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toasts"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

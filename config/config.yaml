@@ -1,0 +1,84 @@
+# =============================================================================
+#  AI Spectroscopic Model - configuration
+# =============================================================================
+
+instrument:
+  model: "Ocean Optics USB4000"
+  # Physical detector limits of the USB4000 (Toshiba TCD1304AP, 3648 px).
+  # The *usable* range depends on the grating/slit your unit shipped with.
+  # Set these to YOUR unit's calibrated range - the engine uses them to decide
+  # which mineral diagnostics it is even allowed to claim.
+  wavelength_min_nm: 350.0
+  wavelength_max_nm: 1000.0
+  detector_pixels: 3648
+  default_integration_time_ms: 100
+  default_scans_to_average: 10
+  default_boxcar_width: 2
+  electric_dark_correction: true
+  nonlinearity_correction: true
+  # Stray light: the fraction of total flux that reaches the wrong detector
+  # channels through internal scatter off the grating and housing. It does NOT
+  # cancel in the reflectance ratio, so on a dark sample it both raises the
+  # apparent reflectance and distorts its shape. The engine uses this to compute
+  # how deep an absorption band must be before it can be believed.
+  # Typical crossed Czerny-Turner bench: 0.1-0.5%. Measure yours with a longpass
+  # filter (e.g. a 550 nm filter: any signal below 550 nm is stray light).
+  stray_light_fraction: 0.002
+
+  # Saturation ceiling for the 16-bit ADC.
+  saturation_counts: 65535
+  saturation_fraction_warn: 0.90
+
+acquisition:
+  # Analysis grid every spectrum is resampled onto (nm).
+  grid_min_nm: 350.0
+  grid_max_nm: 1000.0
+  grid_step_nm: 1.0
+  # Reference/dark are considered stale after this many minutes.
+  reference_ttl_minutes: 30
+  min_snr_for_identification: 25.0
+
+spectrasuite:
+  # SpectraSuite / OceanView export folder. Any *.txt / *.csv / *.trm / *.abs
+  # dropped here is ingested automatically and analysed.
+  watch_enabled: true
+  watch_dir: "data/incoming"
+  # SpectraSuite locks the USB device while it is running. When true the
+  # backend will not try to open the hardware itself.
+  exclusive_device_mode: false
+
+library:
+  # USGS spectral library (splib07a). Run scripts/fetch_usgs_library.py.
+  usgs_dir: "data/library/usgs"
+  store_path: "data/library/library.npz"
+  # Which endmember families to load.
+  include_terrestrial: true
+  include_martian: true
+  include_lunar: true
+  # Synthetic MGM endmembers are used for any mineral with no measured
+  # spectrum available, so the system is functional before the USGS download.
+  allow_synthetic_fallback: true
+
+model:
+  dir: "data/models"
+  # Fusion weights: physics matcher vs learned classifier.
+  weight_matcher: 0.45
+  weight_classifier: 0.55
+  # Conformal prediction miscoverage rate (0.05 -> 95% coverage guarantee).
+  conformal_alpha: 0.05
+  # Below this calibrated probability the engine abstains rather than guess.
+  abstain_below: 0.35
+  # Max endmembers in a mixture solution.
+  max_endmembers: 4
+  # Training-set synthesis
+  train:
+    samples_per_class: 400
+    mixture_fraction: 0.45
+    noise_snr_range: [30, 400]
+    random_seed: 20260902
+
+server:
+  host: "127.0.0.1"
+  port: 8000
+  database: "data/sessions/analyses.db"
+  reports_dir: "data/reports"

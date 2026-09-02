@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Generated data
+data/library/usgs/
+data/library/*.npz
+data/models/*.joblib
+data/models/*.npz
+data/models/metrics.json
+data/sessions/*.db
+data/reports/*
+data/incoming/*
+!data/**/.gitkeep
+
+.vscode/
+.idea/
+*.log

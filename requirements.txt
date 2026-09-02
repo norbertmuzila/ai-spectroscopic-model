@@ -1,0 +1,33 @@
+# ---- Core numerics -------------------------------------------------------
+numpy>=1.26,<3
+scipy>=1.11
+pandas>=2.1
+scikit-learn>=1.4
+
+# ---- API / server --------------------------------------------------------
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2.6
+python-multipart>=0.0.9
+websockets>=12.0
+PyYAML>=6.0
+
+# ---- Spectrometer hardware ----------------------------------------------
+# python-seabreeze talks to the Ocean Optics USB4000 directly. It ships two
+# backends: cseabreeze (bundled C library) and pyseabreeze (pure Python over
+# libusb). Install both so that if one cannot claim the device the other can.
+seabreeze[pyseabreeze]>=2.5
+# pyseabreeze needs a libusb-1.0 binary. libusb-package vendors one, which
+# removes the most common Windows failure ("No backend available").
+libusb-package>=1.0.26
+pyusb>=1.2
+
+# ---- SpectraSuite / OceanView folder ingestion ---------------------------
+watchdog>=4.0
+
+# ---- Reporting -----------------------------------------------------------
+matplotlib>=3.8
+reportlab>=4.1
+
+# ---- Optional: deep model (1-D CNN). System runs without it. -------------
+# torch>=2.2

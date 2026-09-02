@@ -1,0 +1,17 @@
+# Render.com blueprint for the hosted demo.
+#   1. Push this repository to GitHub.
+#   2. render.com -> New -> Blueprint -> pick the repo.
+# The free instance sleeps after ~15 minutes idle and cold-starts in under a
+# minute. It never expires. It runs the simulator: a cloud container has no USB
+# bus, so it cannot read your spectrometer.
+services:
+  - type: web
+    name: spectral-console
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/status
+    envVars:
+      - key: SPECTRO_DEMO
+        value: "1"
