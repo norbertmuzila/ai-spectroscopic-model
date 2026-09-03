@@ -17,7 +17,11 @@ async function api(path, opts) {
     { headers: { "Content-Type": "application/json" } }, opts || {}));
   let body = null;
   try { body = await res.json(); } catch (e) { /* no body */ }
-  if (!res.ok) throw new Error((body && body.detail) || res.statusText);
+  if (!res.ok) {
+    const err = new Error((body && body.detail) || res.statusText);
+    err.status = res.status;
+    throw err;
+  }
   return body;
 }
 
@@ -478,9 +482,21 @@ async function refreshStatus() {
     S.sessionId = st.session_id;
     $("btn-stream").textContent = st.streaming ? "Stop live" : "Live view";
   } catch (e) {
+    // A 401 is not the backend being down - it is the browser not holding
+    // credentials for this origin. Saying "unreachable" sends people looking
+    // for a crashed server when they simply need to sign in.
     const p = $("pill-device");
     p.className = "pill bad";
-    p.querySelector("span").textContent = "backend unreachable";
+    if (e.status === 401) {
+      p.querySelector("span").textContent = "sign in required";
+      if (!window.__authPrompted) {
+        window.__authPrompted = true;
+        toast("This console is password-protected. Reload the page and enter "
+          + "the username and password to continue.", "bad");
+      }
+    } else {
+      p.querySelector("span").textContent = "backend unreachable";
+    }
   }
 }
 

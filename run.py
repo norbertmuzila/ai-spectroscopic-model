@@ -44,6 +44,34 @@ CLOUDFLARED = ROOT / "tools" / "cloudflared.exe"
 URL_RE = re.compile(r"https://[-a-z0-9]+\.trycloudflare\.com")
 
 
+def _redirect_output_if_headless() -> None:
+    """
+    Give the process somewhere to write when it has no console.
+
+    pythonw.exe - the interpreter the scheduled task uses so no black window
+    appears - leaves sys.stdout and sys.stderr as None. The first print() then
+    raises AttributeError and the process dies before it has done anything, with
+    nothing on screen and only "exit code 1" in Task Scheduler to go on. Uvicorn's
+    logging would hit the same wall.
+
+    So when there is no stream, send both to a log file instead. That also means
+    an unattended console leaves a trace worth reading when something goes wrong.
+    """
+    if sys.stdout is not None and sys.stderr is not None:
+        return
+    log_dir = ROOT / "data"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    stream = open(log_dir / "console.log", "a", encoding="utf-8", buffering=1)
+    if sys.stdout is None:
+        sys.stdout = stream
+    if sys.stderr is None:
+        sys.stderr = stream
+    print(f"\n{'=' * 72}\n  started headless {time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+
+_redirect_output_if_headless()
+
+
 def wait_for_server(port: int, timeout: float = 90.0) -> bool:
     deadline = time.time() + timeout
     while time.time() < deadline:
@@ -144,8 +172,15 @@ def main():
     print(f"  Local     : {local}")
     print(f"  API docs  : {local}docs")
     print(f"  Watching  : {cfg.resolve('spectrasuite.watch_dir')}")
-    if password:
-        print(f"  Password  : {password}   (user: {authmod.username()})")
+    # Report what is actually in force, not just what this invocation set.
+    # Credentials also live in data/credentials.json so unattended starts keep
+    # the same password, and a banner that ignored that would claim the console
+    # is open when it is not.
+    effective = password or authmod.password()
+    if effective:
+        print(f"  Password  : {effective}   (user: {authmod.username()})")
+    else:
+        print("  Password  : none - open to anyone who can reach this port")
     if args.tunnel:
         print("  Tunnel    : starting, the public URL appears below in a few seconds")
     print("=" * 72)

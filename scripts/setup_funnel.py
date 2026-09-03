@@ -102,18 +102,35 @@ def main(port: int = 8000) -> int:
         print(f"  password : {pw}  (user: {authmod.username()})")
 
     print(f"\n  Publishing http://127.0.0.1:{port} ...")
-    r = run(exe, "funnel", "--bg", str(port))
-    out = (r.stdout or "") + (r.stderr or "")
+    # `tailscale funnel` blocks when Funnel is not yet enabled on the tailnet:
+    # it prints a one-click approval link and then waits for someone to use it.
+    # Letting that hit a timeout and raise buries the one thing the operator
+    # needs, so the link is pulled out of the output and reported instead.
+    try:
+        r = run(exe, "funnel", "--bg", str(port), timeout=25)
+        out = (r.stdout or "") + (r.stderr or "")
+        code = r.returncode
+    except subprocess.TimeoutExpired as exc:
+        def _text(v):
+            if not v:
+                return ""
+            return v if isinstance(v, str) else v.decode("utf-8", "replace")
+        out = _text(exc.stdout) + _text(exc.stderr)
+        code = 1
+
     for line in out.splitlines():
         if line.strip():
             print("    " + line.strip())
 
-    if r.returncode != 0:
-        low = out.lower()
-        if "funnel" in low and ("attribute" in low or "enable" in low or "permission" in low):
-            print("\n  Funnel is not enabled for your tailnet yet. Tailscale prints a")
-            print("  one-click link above - open it, approve, then run this again.")
-            print("  Otherwise enable it at https://login.tailscale.com/admin/acls")
+    if code != 0:
+        enable = next((ln.strip() for ln in out.splitlines()
+                       if "login.tailscale.com/f/funnel" in ln), "")
+        print("\n  Funnel is not enabled on this tailnet yet.")
+        if enable:
+            print("  Open this once to turn it on, then run this script again:\n")
+            print(f"      {enable}\n")
+        else:
+            print("  Enable it at https://login.tailscale.com/admin/settings/features")
         return 1
 
     url = f"https://{dns}"
