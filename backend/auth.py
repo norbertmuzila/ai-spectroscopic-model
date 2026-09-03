@@ -20,7 +20,9 @@ from __future__ import annotations
 
 import base64
 import hmac
+import json
 import os
+import pathlib
 import secrets
 
 from fastapi import Request
@@ -35,8 +37,42 @@ HEADER = "x-spectro-token"
 OPEN_PATHS = {"/api/health", "/favicon.ico"}
 
 
+# Where the password lives when the console runs unattended. A scheduled task
+# has no convenient way to carry an environment variable, and a permanent public
+# address needs a password that survives reboots rather than being regenerated
+# on every start.
+CRED_FILE = pathlib.Path(__file__).resolve().parent.parent / "data" / "credentials.json"
+
+
 def password() -> str | None:
-    return os.environ.get(ENV_PASSWORD) or None
+    env = os.environ.get(ENV_PASSWORD)
+    if env:
+        return env
+    try:
+        if CRED_FILE.exists():
+            data = json.loads(CRED_FILE.read_text(encoding="utf-8"))
+            return data.get("password") or None
+    except Exception:
+        pass
+    return None
+
+
+def save_password(pw: str, user: str | None = None) -> pathlib.Path:
+    """Persist credentials for unattended starts. Readable only by this user."""
+    CRED_FILE.parent.mkdir(parents=True, exist_ok=True)
+    CRED_FILE.write_text(json.dumps(
+        {"user": user or username(), "password": pw}, indent=2), encoding="utf-8")
+    try:
+        # Windows ACL: strip inheritance and grant only the current user.
+        import subprocess
+        me = os.environ.get("USERNAME", "")
+        if os.name == "nt" and me:
+            subprocess.run(["icacls", str(CRED_FILE), "/inheritance:r",
+                            "/grant:r", f"{me}:F"],
+                           capture_output=True, timeout=15)
+    except Exception:
+        pass
+    return CRED_FILE
 
 
 def username() -> str:

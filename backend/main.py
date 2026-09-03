@@ -209,6 +209,24 @@ class SimulatorSample(BaseModel):
     weathering: float = 0.0
 
 
+def _public_url() -> str | None:
+    """
+    The permanent public address, if one has been set up.
+
+    Written by scripts/setup_funnel.py. When the console runs unattended there
+    is no terminal printing the address, so the dashboard has to be able to show
+    it - otherwise the only way to find your own URL is to go looking for it.
+    """
+    try:
+        f = ROOT / "data" / "public_url.txt"
+        if f.exists():
+            url = f.read_text(encoding="utf-8").strip()
+            return url or None
+    except Exception:
+        pass
+    return None
+
+
 # ---------------------------------------------------------------------------
 #  Status
 # ---------------------------------------------------------------------------
@@ -229,6 +247,7 @@ def status():
             "temperature": engine.calibration.scaler.temperature,
             "conformal_alpha": engine.calibration.conformal.alpha,
         },
+        "public_url": _public_url(),
         "spectrasuite": {
             "watching": ST.watcher is not None,
             "watch_dir": str(CFG.resolve("spectrasuite.watch_dir")),

@@ -447,6 +447,18 @@ async function refreshStatus() {
         `(target ${((v.conformal_target_coverage || 0) * 100).toFixed(0)}%)`
       : "Learned model not trained — run scripts/train.py. Physics matcher is active.";
 
+    // Show the permanent address in the header. Running unattended there is no
+    // terminal to read it from, so the console has to tell you its own URL.
+    const pub = $("pill-public");
+    if (st.public_url) {
+      pub.classList.remove("hidden");
+      pub.href = st.public_url;
+      pub.className = "pill ok";
+      pub.querySelector("span").textContent = st.public_url.replace(/^https?:\/\//, "");
+    } else {
+      pub.classList.add("hidden");
+    }
+
     $("btn-connect").disabled = st.connected;
     $("btn-disconnect").disabled = !st.connected;
     $("grp-sim").classList.toggle("hidden", !dev.simulated);
