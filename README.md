@@ -522,7 +522,69 @@ python scripts/train.py     # once, ~4 minutes
 python run.py
 ```
 
-## Deploying
+## The live address
+
+The console is published at a permanent HTTPS address:
+
+```
+https://<machine>.<your-tailnet>.ts.net
+user: spectro     password: in data/credentials.json
+```
+
+It starts by itself at Windows sign-in, with no terminal window, and the address
+does not change across reboots or network changes.
+
+### How it is put together
+
+| Piece | What it does |
+|---|---|
+| Scheduled Task "Spectral Console" | Launches `run.py` under `pythonw.exe` at sign-in. No console window; restarts up to 3 times on failure; 20 s delay so the USB stack settles first. |
+| Tailscale Funnel | Publishes `127.0.0.1:8000` at a stable `*.ts.net` hostname with a Let's Encrypt certificate. Free, no domain to buy. |
+| `backend/auth.py` | HTTP Basic or `X-Spectro-Token`, constant-time comparison. `/api/health` stays open as a liveness probe. |
+| `data/credentials.json` | The password, ACL'd to your account. An unattended start has no environment to carry one, and a permanent address needs one that stays the same. |
+
+Set it up on another machine with **`SETUP-PERMANENT-URL.bat`**, or step by step:
+
+```bash
+tailscale up --hostname=spectral-console
+python scripts/setup_funnel.py                                  # publish
+powershell -ExecutionPolicy Bypass -File scripts/install_autostart.ps1
+```
+
+### Why a tunnel and not a cloud host
+
+The spectrometer is a USB device on this machine. A container in a datacentre
+has no USB bus, so a cloud deployment could only ever run the simulator. A
+tunnel publishes *this* instance, so the measurement still happens where the
+hardware is. That is the only arrangement in which a public URL reads the real
+instrument.
+
+### Security, plainly
+
+The address is public, and it is discoverable: Funnel hostnames get a Let's
+Encrypt certificate, and every issued certificate is published in Certificate
+Transparency logs that scanners read continuously. **An internet scanner probed
+`/debug/default/view?panel=config` within minutes of this address going live**
+and was refused with a 401. That is not hypothetical hardening - it happened
+during setup, and it is why the password is mandatory rather than optional.
+
+The API can start acquisitions, overwrite calibration references and read every
+stored analysis, so:
+
+- Do not remove the password. `setup_funnel.py` refuses to run without one.
+- To change it: edit `data/credentials.json` and restart the task.
+- To take the address down entirely: `tailscale funnel --https=443 off`.
+
+### Known behaviour
+
+When the machine's IP changes - moving between networks, a DHCP renewal -
+Tailscale re-establishes its relay path and the public address is briefly
+unreachable, typically under a minute. It recovers on its own; nothing needs
+restarting. The local `127.0.0.1:8000` address is unaffected throughout.
+
+Logs from the unattended process go to `data/console.log`.
+
+## Deploying elsewhere
 
 `deploy/DEPLOY.md` covers three options, but the headline is a constraint worth
 stating plainly: **a hosted web app cannot read your spectrometer.** A container
