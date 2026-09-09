@@ -531,6 +531,11 @@ https://<machine>.<your-tailnet>.ts.net
 user: spectro     password: in data/credentials.json
 ```
 
+Your own address is printed by `scripts/setup_funnel.py`, stored in
+`data/public_url.txt`, and shown in the dashboard header. It is deliberately not
+recorded in this file: the console is reachable from the internet, and a public
+repository is not the place to advertise the address of a live instrument.
+
 It starts by itself at Windows sign-in, with no terminal window, and the address
 does not change across reboots or network changes.
 
