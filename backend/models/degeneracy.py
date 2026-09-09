@@ -106,11 +106,15 @@ def _group_name(members: list, depths: dict, albedos: dict, mineral_lookup) -> s
         return f"Spectrally featureless, {tone}"
 
     # Named after the mineral groups actually present, which is the level at
-    # which the answer is still true.
+    # which the answer is still true. The group comes from USGS's own
+    # classification wherever the library provides one.
     groups = []
     for m in members:
-        obj = mineral_lookup(m)
-        g = obj.group if obj is not None else None
+        g = mineral_lookup(m)
+        if isinstance(g, str):
+            g = g.strip()
+        elif g is not None:
+            g = getattr(g, "group", None)
         if g and g not in groups:
             groups.append(g)
     if len(groups) == 1:
@@ -198,7 +202,9 @@ def build(library, lo_nm: float, hi_nm: float,
     for l in members:
         members[l].sort(key=lambda m: -depths.get(m, 0.0))
 
-    names = {l: _group_name(ms, depths, albedos, library.mineral)
+    lookup = (library.usgs_group if hasattr(library, "usgs_group")
+              else library.mineral)
+    names = {l: _group_name(ms, depths, albedos, lookup)
              for l, ms in members.items()}
 
     return DegeneracyMap(range_nm=(float(wl.min()), float(wl.max())),

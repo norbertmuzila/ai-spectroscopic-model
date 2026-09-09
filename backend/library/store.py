@@ -21,6 +21,7 @@ import numpy as np
 from backend import config as cfg_mod
 from backend.library import minerals as mindb
 from backend.library import synth, usgs
+from backend.library import usgs_splib
 
 
 @dataclass
@@ -36,6 +37,21 @@ class SpectralLibrary:
     # ---- lookups ---------------------------------------------------------
     def mineral(self, name: str):
         return mindb.BY_NAME.get(name)
+
+    def usgs_group(self, name: str) -> str:
+        """
+        The mineral group USGS assigns, taken from the library title line.
+
+        Used for naming degeneracy groups. Falling back to the hand-written
+        taxonomy would reintroduce exactly the vocabulary mismatch that using
+        USGS names was meant to remove.
+        """
+        from backend.library import usgs_splib
+        for spec in usgs_splib.load().by_name(name):
+            if spec.group:
+                return spec.group
+        obj = mindb.BY_NAME.get(name)
+        return obj.group if obj else ""
 
     def entries_for(self, name: str) -> np.ndarray:
         return np.flatnonzero(np.asarray(self.names) == name)
@@ -97,6 +113,70 @@ class SpectralLibrary:
 # ---------------------------------------------------------------------------
 #  Build
 # ---------------------------------------------------------------------------
+def build_from_splib(grid_nm: np.ndarray,
+                     lo_nm: float, hi_nm: float,
+                     min_coverage: float = 0.9,
+                     chapters: set | None = None) -> SpectralLibrary | None:
+    """
+    Build the reference library directly from measured USGS splib05a spectra.
+
+    Every class is a USGS mineral name and every entry carries the USGS sample
+    number it came from, so a reported identification can be looked up in the
+    source library rather than taken on trust. Nothing is synthesised here: if
+    USGS has no spectrum for a mineral, that mineral is simply not a class, which
+    is the honest position - the system cannot claim to recognise something it
+    has never been shown.
+
+    A spectrum is skipped when it does not actually cover the instrument's
+    range. A library entry measured only from 1.3 um upward has nothing to say
+    about a 340-912 nm measurement, and including it would let the matcher
+    "identify" it from extrapolated edge values.
+    """
+    index = usgs_splib.load()
+    if not index.spectra:
+        return None
+
+    names, sample_ids, sources, rows = [], [], [], []
+    for spec in index.spectra:
+        # Chapter filter. The artificial and coatings chapters hold materials
+        # such as painted aluminium and plastic sheeting whose visible spectra
+        # are strong and distinctive - and which will win against a real mineral
+        # on a rock sample if they are allowed to compete.
+        if chapters and spec.chapter not in chapters:
+            continue
+        if not spec.covers(lo_nm, hi_nm, min_coverage):
+            continue
+        resampled = spec.resample(grid_nm)
+        if not np.isfinite(resampled).all():
+            # Fill only small gaps at the very edges; anything larger means the
+            # spectrum does not really span the range.
+            finite = np.isfinite(resampled)
+            if finite.sum() < 0.92 * resampled.size:
+                continue
+            idx = np.arange(resampled.size)
+            resampled = np.interp(idx, idx[finite], resampled[finite])
+        names.append(spec.name)
+        sample_ids.append(spec.sample or spec.file)
+        sources.append("usgs")
+        rows.append(np.clip(resampled, 1e-5, 1.5))
+
+    if not rows:
+        return None
+
+    spectra = np.vstack(rows)
+    classes = sorted(set(names))
+    cindex = {c: i for i, c in enumerate(classes)}
+    return SpectralLibrary(
+        grid_nm=np.asarray(grid_nm, dtype=np.float64),
+        spectra=spectra,
+        names=names,
+        sample_ids=sample_ids,
+        sources=sources,
+        classes=classes,
+        class_index=np.array([cindex[n] for n in names], dtype=np.int32),
+    )
+
+
 def build(grid_nm: np.ndarray | None = None,
           environments: list | None = None,
           usgs_dir: Path | None = None,
@@ -186,8 +266,22 @@ def get_library(rebuild: bool = False) -> SpectralLibrary:
             _cached = lib
             return lib
 
-    lib = build(grid_nm=grid,
-                allow_synthetic=bool(cfg.get_path("library.allow_synthetic_fallback", True)))
+    # Measured USGS spectra first. Every class is then a real USGS mineral with
+    # a real sample number behind it, so a reported identification can be looked
+    # up in the published library instead of being taken on trust. Synthesised
+    # endmembers are only a fallback for when the library has not been fetched.
+    lo = float(cfg.get_path("instrument.wavelength_min_nm", 340.0))
+    hi = float(cfg.get_path("instrument.wavelength_max_nm", 912.0))
+    chapters = set(cfg.get_path("library.usgs_chapters", ["M"]) or ["M"])
+    lib = build_from_splib(grid, lo, hi, chapters=chapters)
+
+    if lib is None:
+        print("[library] no USGS splib05a data found - falling back to synthesised "
+              "endmembers. Run: python scripts/fetch_usgs_splib05.py")
+        lib = build(grid_nm=grid,
+                    allow_synthetic=bool(
+                        cfg.get_path("library.allow_synthetic_fallback", True)))
+
     lib.save(path)
     _cached = lib
     return lib

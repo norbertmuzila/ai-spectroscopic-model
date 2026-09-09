@@ -168,6 +168,7 @@ class SpectralMatcher:
         self._cr_cache: np.ndarray | None = None
         self._bands_cache: list | None = None
         self._cache_key = None
+        self._usgs_bands: dict | None = None
 
     # -- library-side precomputation --------------------------------------
     def _prepare(self, mask: np.ndarray):
@@ -198,14 +199,36 @@ class SpectralMatcher:
         coverage is 0.0, and no amount of curve similarity is allowed to turn
         that into a confident identification.
         """
+        centres = self._diagnostic_centres_nm(name)
+        if centres is None:
+            return 1.0          # nothing known about this mineral's bands
+        if not centres:
+            return 0.0          # measured, and it has no bands at all
+        inside = sum(1 for c in centres if lo_nm <= c <= hi_nm)
+        return inside / len(centres)
+
+    def _diagnostic_centres_nm(self, name: str):
+        """
+        Band centres in nanometres, measured from the USGS library where it has
+        this mineral, otherwise from the hand-written knowledge base.
+
+        Returning None means "unknown" and returning an empty list means
+        "measured, and there are none" - two very different statements that a
+        single empty list would conflate, with the effect that every mineral
+        would pass the coverage check.
+        """
+        if self._usgs_bands is None:
+            try:
+                from backend.library import usgs_splib
+                self._usgs_bands = usgs_splib.diagnostic_bands()
+            except Exception:
+                self._usgs_bands = {}
+        if name in self._usgs_bands:
+            return [b["centre_nm"] for b in self._usgs_bands[name]]
         m = self.library.mineral(name)
         if m is None:
-            return 1.0
-        centres = m.diagnostic_centres
-        if not centres:
-            return 1.0          # identified by continuum shape, not by bands
-        inside = sum(1 for c in centres if lo_nm <= c * 1000.0 <= hi_nm)
-        return inside / len(centres)
+            return None
+        return [c * 1000.0 for c in m.diagnostic_centres] or None
 
     # -- main entry point --------------------------------------------------
     @staticmethod
@@ -222,7 +245,8 @@ class SpectralMatcher:
               continuum_removed: np.ndarray, top_k: int = 12,
               absolute_reflectance: bool = True,
               noise_sigma: float | None = None,
-              min_band_depth: float = 0.012) -> list:
+              min_band_depth: float = 0.012,
+              exclude_entries: set | None = None) -> list:
         grid = self.library.grid_nm
         lo, hi = float(wl_nm.min()), float(wl_nm.max())
         mask = (grid >= lo - 1e-6) & (grid <= hi + 1e-6)
@@ -293,6 +317,14 @@ class SpectralMatcher:
 
         total = (1.0 - w_cont) * shape + w_cont * continuum_score
 
+        # Leave-one-out support: an excluded entry is removed from scoring
+        # entirely, so a validation fold cannot match a spectrum against itself.
+        # Without this every accuracy number would be a lookup, not a test.
+        if exclude_entries:
+            for e in exclude_entries:
+                if 0 <= e < total.size:
+                    total[e] = -np.inf
+
         # Collapse per-entry scores to per-mineral, keeping the best entry.
         names = np.asarray(self.library.names)
         results = []
@@ -300,6 +332,8 @@ class SpectralMatcher:
             idx = np.flatnonzero(names == name)
             if idx.size == 0:
                 continue
+            if not np.isfinite(total[idx]).any():
+                continue                 # every reference for this mineral was excluded
             best = idx[int(np.argmax(total[idx]))]
             results.append(MatchResult(
                 name=name,
@@ -318,7 +352,7 @@ class SpectralMatcher:
         return results[:top_k]
 
     def scores_to_probabilities(self, results: list, temperature: float = 0.055,
-                                coverage_floor: float = 0.15) -> dict:
+                                coverage_floor: float = 0.10) -> dict:
         """
         Convert similarities to a probability distribution over minerals.
 
@@ -332,7 +366,15 @@ class SpectralMatcher:
         names = [r.name for r in results]
         sims = np.array([r.similarity for r in results], dtype=np.float64)
         cov = np.array([r.diagnostic_coverage for r in results], dtype=np.float64)
-        penalty = coverage_floor + (1.0 - coverage_floor) * cov
+        # Concave in coverage, so the penalty is a hammer at zero and barely a
+        # nudge above a half. A mineral with none of its diagnostic bands in
+        # range must be pushed hard down - there is no evidence for it at all.
+        # But one with two of its four bands visible is genuinely supported, and
+        # a linear penalty demoted such minerals below wrong answers that merely
+        # happened to have full coverage, costing real accuracy for no gain in
+        # honesty.
+        penalty = coverage_floor + (1.0 - coverage_floor) * np.power(
+            np.clip(cov, 0.0, 1.0), 0.4)
         logits = sims / max(temperature, 1e-6) + np.log(np.maximum(penalty, 1e-6))
         logits -= logits.max()
         p = np.exp(logits)

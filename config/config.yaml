@@ -69,6 +69,17 @@ library:
   # spectrum available, so the system is functional before the USGS download.
   allow_synthetic_fallback: true
 
+  # Which splib05a chapters may be reported as an identification.
+  #   M  Minerals            (504 spectra) - the default
+  #   S  Soils and mixtures  (111) - field soils, alteration assemblages
+  #   C  Coatings            (12)
+  #   A  Artificial          (47)  - plastics, paints, fiberglass
+  # Restricted to minerals by default. Chapters A and C contain materials like
+  # Plastic_Tarp and Painted_Aluminum, which have strong visible-range spectra
+  # and will happily out-score a real mineral on a rock sample. Add "S" if you
+  # analyse soils and want USGS soil and mixture entries as candidates.
+  usgs_chapters: ["M"]
+
 model:
   dir: "data/models"
   # Fusion weights: physics matcher vs learned classifier.

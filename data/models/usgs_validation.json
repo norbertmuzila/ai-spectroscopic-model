@@ -1,0 +1,660 @@
+{
+  "generated": "2026-09-09T20:19:57",
+  "ground_truth": "USGS splib05a (Clark et al. 2003, OFR 03-395)",
+  "method": "leave-one-out over library samples, simulated instrument view",
+  "window_nm": [
+    340.0,
+    912.0
+  ],
+  "snr": 120.0,
+  "trials": 1352,
+  "top1": 0.35428994082840237,
+  "top3": 0.4881656804733728,
+  "top5": 0.5961538461538461,
+  "group_level": 0.3683431952662722,
+  "degeneracy": {
+    "range_nm": [
+      340.0,
+      912.0
+    ],
+    "n_groups": 173,
+    "n_singleton_groups": 168,
+    "largest_group": 41
+  },
+  "per_mineral": {
+    "Actinolite": {
+      "hits": 5,
+      "trials": 20
+    },
+    "Albite": {
+      "hits": 4,
+      "trials": 12
+    },
+    "Almandine": {
+      "hits": 12,
+      "trials": 24
+    },
+    "Alunite": {
+      "hits": 3,
+      "trials": 28
+    },
+    "Andradite": {
+      "hits": 12,
+      "trials": 24
+    },
+    "Anorthite": {
+      "hits": 1,
+      "trials": 12
+    },
+    "Antigorite": {
+      "hits": 27,
+      "trials": 28
+    },
+    "Augite": {
+      "hits": 2,
+      "trials": 12
+    },
+    "Beryl": {
+      "hits": 7,
+      "trials": 8
+    },
+    "Biotite": {
+      "hits": 7,
+      "trials": 8
+    },
+    "Buddingtonite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Bytownite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Calcite": {
+      "hits": 0,
+      "trials": 16
+    },
+    "Carnallite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Chalcopyrite": {
+      "hits": 7,
+      "trials": 8
+    },
+    "Chlorite": {
+      "hits": 13,
+      "trials": 28
+    },
+    "Chrysotile": {
+      "hits": 0,
+      "trials": 12
+    },
+    "Clinochlore": {
+      "hits": 0,
+      "trials": 12
+    },
+    "Clinoptilolite": {
+      "hits": 1,
+      "trials": 8
+    },
+    "Clinochlore_Fe": {
+      "hits": 7,
+      "trials": 16
+    },
+    "Cookeite": {
+      "hits": 3,
+      "trials": 12
+    },
+    "Datolite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Dickite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Diopside": {
+      "hits": 0,
+      "trials": 12
+    },
+    "Dolomite": {
+      "hits": 0,
+      "trials": 12
+    },
+    "Elbaite": {
+      "hits": 9,
+      "trials": 12
+    },
+    "Epidote": {
+      "hits": 20,
+      "trials": 20
+    },
+    "Galena": {
+      "hits": 15,
+      "trials": 24
+    },
+    "Gibbsite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Goethite": {
+      "hits": 22,
+      "trials": 28
+    },
+    "Grossular": {
+      "hits": 1,
+      "trials": 20
+    },
+    "Gypsum": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Halloysite": {
+      "hits": 0,
+      "trials": 16
+    },
+    "Hematite": {
+      "hits": 37,
+      "trials": 44
+    },
+    "Hectorite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Hedenbergite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Heulandite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Hornblende": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Hypersthene": {
+      "hits": 31,
+      "trials": 36
+    },
+    "Illite": {
+      "hits": 0,
+      "trials": 20
+    },
+    "Jarosite": {
+      "hits": 31,
+      "trials": 36
+    },
+    "Kaolinite": {
+      "hits": 0,
+      "trials": 32
+    },
+    "Lepidolite": {
+      "hits": 20,
+      "trials": 20
+    },
+    "Lizardite": {
+      "hits": 16,
+      "trials": 16
+    },
+    "Magnetite": {
+      "hits": 2,
+      "trials": 8
+    },
+    "Meionite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Microcline": {
+      "hits": 0,
+      "trials": 24
+    },
+    "Mizzonite": {
+      "hits": 7,
+      "trials": 16
+    },
+    "Montmorillonite": {
+      "hits": 3,
+      "trials": 32
+    },
+    "Muscovite": {
+      "hits": 11,
+      "trials": 52
+    },
+    "Natrolite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Nontronite": {
+      "hits": 13,
+      "trials": 16
+    },
+    "Olivine": {
+      "hits": 64,
+      "trials": 68
+    },
+    "Oligoclase": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Orthoclase": {
+      "hits": 0,
+      "trials": 12
+    },
+    "Opal": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Palygorskite": {
+      "hits": 2,
+      "trials": 8
+    },
+    "Pectolite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Phlogopite": {
+      "hits": 7,
+      "trials": 16
+    },
+    "Prochlorite": {
+      "hits": 0,
+      "trials": 12
+    },
+    "Pyrite": {
+      "hits": 15,
+      "trials": 20
+    },
+    "Pyrophyllite": {
+      "hits": 0,
+      "trials": 12
+    },
+    "Quartz": {
+      "hits": 0,
+      "trials": 16
+    },
+    "Rectorite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Rhodonite": {
+      "hits": 8,
+      "trials": 8
+    },
+    "Richterite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Rhodochrosite": {
+      "hits": 8,
+      "trials": 8
+    },
+    "Riebeckite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Rutile": {
+      "hits": 1,
+      "trials": 8
+    },
+    "Sanidine": {
+      "hits": 2,
+      "trials": 8
+    },
+    "Saponite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Sepiolite": {
+      "hits": 0,
+      "trials": 16
+    },
+    "Serpentine": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Spessartine": {
+      "hits": 4,
+      "trials": 16
+    },
+    "Sphalerite": {
+      "hits": 11,
+      "trials": 20
+    },
+    "Stilbite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Talc": {
+      "hits": 0,
+      "trials": 16
+    },
+    "Thenardite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Thuringite": {
+      "hits": 8,
+      "trials": 16
+    },
+    "Topaz": {
+      "hits": 0,
+      "trials": 72
+    },
+    "Tremolite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Ulexite": {
+      "hits": 0,
+      "trials": 8
+    },
+    "Vermiculite": {
+      "hits": 0,
+      "trials": 16
+    }
+  },
+  "confusions": [
+    {
+      "truth": "Topaz",
+      "reported": "Lepidolite",
+      "count": 18
+    },
+    {
+      "truth": "Topaz",
+      "reported": "Chrysotile",
+      "count": 17
+    },
+    {
+      "truth": "Kaolinite",
+      "reported": "Fluorapatite",
+      "count": 13
+    },
+    {
+      "truth": "Topaz",
+      "reported": "Anhydrite",
+      "count": 13
+    },
+    {
+      "truth": "Muscovite",
+      "reported": "Paragonite",
+      "count": 8
+    },
+    {
+      "truth": "Chlorite",
+      "reported": "Antigorite",
+      "count": 7
+    },
+    {
+      "truth": "Muscovite",
+      "reported": "Grossular",
+      "count": 7
+    },
+    {
+      "truth": "Prochlorite",
+      "reported": "Thuringite",
+      "count": 7
+    },
+    {
+      "truth": "Thuringite",
+      "reported": "Prochlorite",
+      "count": 7
+    },
+    {
+      "truth": "Alunite",
+      "reported": "Brucite",
+      "count": 6
+    },
+    {
+      "truth": "Diopside",
+      "reported": "Hedenbergite",
+      "count": 6
+    },
+    {
+      "truth": "Galena",
+      "reported": "Hematite",
+      "count": 6
+    },
+    {
+      "truth": "Gypsum",
+      "reported": "Chrysotile",
+      "count": 6
+    },
+    {
+      "truth": "Magnetite",
+      "reported": "Hematite",
+      "count": 6
+    },
+    {
+      "truth": "Muscovite",
+      "reported": "Corundum",
+      "count": 6
+    },
+    {
+      "truth": "Topaz",
+      "reported": "Stilbite",
+      "count": 6
+    },
+    {
+      "truth": "Almandine",
+      "reported": "Spessartine",
+      "count": 5
+    },
+    {
+      "truth": "Calcite",
+      "reported": "Europium_Oxide",
+      "count": 5
+    },
+    {
+      "truth": "Chlorite",
+      "reported": "Clinochlore_Fe",
+      "count": 5
+    },
+    {
+      "truth": "Clinochlore_Fe",
+      "reported": "Chlorite",
+      "count": 5
+    },
+    {
+      "truth": "Microcline",
+      "reported": "Polyhalite",
+      "count": 5
+    },
+    {
+      "truth": "Microcline",
+      "reported": "Celestite",
+      "count": 5
+    },
+    {
+      "truth": "Montmorillonite",
+      "reported": "Grossular",
+      "count": 5
+    },
+    {
+      "truth": "Orthoclase",
+      "reported": "Sanidine",
+      "count": 5
+    },
+    {
+      "truth": "Talc",
+      "reported": "Olivine",
+      "count": 5
+    },
+    {
+      "truth": "Talc",
+      "reported": "Chrysotile",
+      "count": 5
+    },
+    {
+      "truth": "Actinolite",
+      "reported": "Clinochlore",
+      "count": 4
+    },
+    {
+      "truth": "Actinolite",
+      "reported": "Antigorite",
+      "count": 4
+    },
+    {
+      "truth": "Almandine",
+      "reported": "Goethite",
+      "count": 4
+    },
+    {
+      "truth": "Andradite",
+      "reported": "Almandine",
+      "count": 4
+    },
+    {
+      "truth": "Anorthite",
+      "reported": "Sanidine",
+      "count": 4
+    },
+    {
+      "truth": "Buddingtonite",
+      "reported": "Almandine",
+      "count": 4
+    },
+    {
+      "truth": "Bytownite",
+      "reported": "Antigorite",
+      "count": 4
+    },
+    {
+      "truth": "Carnallite",
+      "reported": "Lepidolite",
+      "count": 4
+    },
+    {
+      "truth": "Clinoptilolite",
+      "reported": "Mordenite+Clinopt.",
+      "count": 4
+    },
+    {
+      "truth": "Clinochlore_Fe",
+      "reported": "Antigorite",
+      "count": 4
+    },
+    {
+      "truth": "Dolomite",
+      "reported": "Olivine",
+      "count": 4
+    },
+    {
+      "truth": "Goethite",
+      "reported": "Pyrrhotite",
+      "count": 4
+    },
+    {
+      "truth": "Hedenbergite",
+      "reported": "Diopside",
+      "count": 4
+    },
+    {
+      "truth": "Heulandite",
+      "reported": "Chrysotile",
+      "count": 4
+    },
+    {
+      "truth": "Illite",
+      "reported": "Uralite",
+      "count": 4
+    },
+    {
+      "truth": "Illite",
+      "reported": "Holmquistite",
+      "count": 4
+    },
+    {
+      "truth": "Kaolinite",
+      "reported": "Alunite",
+      "count": 4
+    },
+    {
+      "truth": "Microcline",
+      "reported": "Hydrogrossular",
+      "count": 4
+    },
+    {
+      "truth": "Palygorskite",
+      "reported": "Montmorillonite",
+      "count": 4
+    },
+    {
+      "truth": "Phlogopite",
+      "reported": "Antigorite",
+      "count": 4
+    },
+    {
+      "truth": "Prochlorite",
+      "reported": "Clinochlore_Fe",
+      "count": 4
+    },
+    {
+      "truth": "Pyrophyllite",
+      "reported": "Sanidine",
+      "count": 4
+    },
+    {
+      "truth": "Quartz",
+      "reported": "Celestite",
+      "count": 4
+    },
+    {
+      "truth": "Riebeckite",
+      "reported": "Glaucophane",
+      "count": 4
+    },
+    {
+      "truth": "Serpentine",
+      "reported": "Antigorite",
+      "count": 4
+    },
+    {
+      "truth": "Spessartine",
+      "reported": "Almandine",
+      "count": 4
+    },
+    {
+      "truth": "Topaz",
+      "reported": "Albite",
+      "count": 4
+    },
+    {
+      "truth": "Topaz",
+      "reported": "Marialite",
+      "count": 4
+    },
+    {
+      "truth": "Topaz",
+      "reported": "Sanidine",
+      "count": 4
+    },
+    {
+      "truth": "Vermiculite",
+      "reported": "Grossular",
+      "count": 4
+    },
+    {
+      "truth": "Vermiculite",
+      "reported": "Phlogopite",
+      "count": 4
+    },
+    {
+      "truth": "Albite",
+      "reported": "Anhydrite",
+      "count": 3
+    },
+    {
+      "truth": "Almandine",
+      "reported": "Alunite",
+      "count": 3
+    },
+    {
+      "truth": "Alunite",
+      "reported": "Grossular",
+      "count": 3
+    }
+  ]
+}

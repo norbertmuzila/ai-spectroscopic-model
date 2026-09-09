@@ -90,6 +90,20 @@ class AnalysisEngine:
         if load_model:
             self.load_model()
 
+        # Per-mineral reliability measured by leave-one-out against USGS ground
+        # truth. Attached to every identification so a result carries its own
+        # track record: "Hematite" from a mineral validated at 85% is a very
+        # different claim from one the validation never once got right, and the
+        # operator should not have to go looking for that distinction.
+        self.validation: dict = {}
+        try:
+            vpath = self.cfg.resolve("model.dir") / "usgs_validation.json"
+            if vpath.exists():
+                import json
+                self.validation = json.loads(vpath.read_text(encoding="utf-8"))
+        except Exception as exc:
+            print(f"[engine] could not load USGS validation: {exc}")
+
         self.instrument_range = (
             float(self.cfg.get_path("instrument.wavelength_min_nm", 350.0)),
             float(self.cfg.get_path("instrument.wavelength_max_nm", 1000.0)),
@@ -203,6 +217,27 @@ class AnalysisEngine:
         self._last_signal_fraction = frac
         stray = float(self.cfg.get_path("instrument.stray_light_fraction", 0.002))
         return float(np.clip(stray / frac, 0.0, 0.5))
+
+    # ------------------------------------------------------------------
+    def _reliability(self, name: str) -> dict | None:
+        """
+        How often leave-one-out validation against USGS got this mineral right.
+
+        None means the mineral was never tested - which happens when the USGS
+        library holds only one sample of it, so hiding that sample leaves nothing
+        to find. That is a real gap in the evidence and is reported as such
+        rather than as a passing grade.
+        """
+        per = (self.validation or {}).get("per_mineral") or {}
+        rec = per.get(name)
+        if not rec or not rec.get("trials"):
+            return None
+        hits, trials = rec["hits"], rec["trials"]
+        return {
+            "accuracy": round(hits / trials, 3),
+            "trials": trials,
+            "source": "leave-one-out vs USGS splib05a",
+        }
 
     # ------------------------------------------------------------------
     def _range_audit(self, ranked: list, lo: float, hi: float) -> dict:
@@ -569,6 +604,7 @@ class AnalysisEngine:
             "spectral_group": degmap.label_for(top_name),
             "indistinguishable_from": siblings,
             "band_depth_in_range": round(float(degmap.depths.get(top_name, 0.0)), 4),
+            "usgs_validated": self._reliability(top_name),
         }
 
         interpretation = self._interpret(top_name, top_p, bands, pset, audit, qc,

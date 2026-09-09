@@ -23,3 +23,7 @@ data/incoming/*
 tools/
 # vendored USB driver package (7 MB, fetched by scripts/fetch_driver.py)
 drivers/
+
+# USGS library: 674 downloaded spectra (10 MB) - refetch with scripts/fetch_usgs_splib05.py
+data/library/splib05a/raw/
+data/library/splib05a/splib05a.json
