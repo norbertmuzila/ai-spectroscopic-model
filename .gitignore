@@ -27,3 +27,12 @@ drivers/
 # USGS library: 674 downloaded spectra (10 MB) - refetch with scripts/fetch_usgs_splib05.py
 data/library/splib05a/raw/
 data/library/splib05a/splib05a.json
+
+# Secrets and machine-specific state - never commit these.
+# credentials.json holds the password for a publicly reachable console, and
+# public_url.txt names the address it protects. Together they are a working
+# login, and git history keeps them forever once pushed.
+data/credentials.json
+data/public_url.txt
+data/console.log
+drivers/install-log.txt
