@@ -61,7 +61,7 @@ def render_figure(result: dict, path: Path) -> Path:
     modelled = np.asarray(spec.get("modelled") or [], dtype=float)
 
     fig, axes = plt.subplots(2, 1, figsize=(8.6, 5.6), sharex=True,
-                             gridspec_kw={"height_ratios": [1.15, 1.0], "hspace": 0.12})
+                             gridspec_kw={"height_ratios": [1.15, 1.0], "hspace": 0.30})
 
     ax = axes[0]
     ax.plot(wl, refl, color="#1c4e80", lw=1.5, label="Measured reflectance")
@@ -69,7 +69,11 @@ def render_figure(result: dict, path: Path) -> Path:
     if modelled.size == wl.size and modelled.size:
         ax.plot(wl, modelled, color="#c8102e", lw=1.1, alpha=0.85,
                 label="Unmixing model fit")
+    # Reflectance against wavelength, with its own labelled wavelength axis
+    # rather than borrowing the lower panel's.
     ax.set_ylabel("Reflectance")
+    ax.set_xlabel("Wavelength (nm)")
+    ax.tick_params(labelbottom=True)
     ax.legend(loc="best", fontsize=7.5, framealpha=0.9)
     ax.grid(alpha=0.25, lw=0.5)
     ident = result["identification"]
@@ -87,12 +91,12 @@ def render_figure(result: dict, path: Path) -> Path:
             ax.annotate(f"{c:.0f}", (c, 1.005), fontsize=6.5, rotation=90,
                         ha="center", va="bottom", color="#c8102e")
     ax.set_xlabel("Wavelength (nm)")
-    ax.set_ylabel("Continuum removed")
+    ax.set_ylabel("Continuum-removed\nreflectance")
     ax.grid(alpha=0.25, lw=0.5)
 
     # subplots_adjust rather than tight_layout: the shared-x gridspec already
     # fixes the vertical arrangement, and tight_layout fights it.
-    fig.subplots_adjust(left=0.085, right=0.985, top=0.93, bottom=0.095, hspace=0.12)
+    fig.subplots_adjust(left=0.085, right=0.985, top=0.93, bottom=0.095, hspace=0.30)
     fig.savefig(path, dpi=170)
     plt.close(fig)
     return path

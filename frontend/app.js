@@ -133,8 +133,22 @@ function chart(svg, o) {
     svg.appendChild(mk("text", { x: x, y: y1 + (o.strip ? 27 : 16), "text-anchor": "middle",
       fill: ink3, "font-family": MONO, "font-size": 10 }, Math.round(t)));
   }
-  svg.appendChild(mk("text", { x: x0, y: 12, fill: ink3, "font-family": MONO,
-    "font-size": 9.5, "letter-spacing": ".09em" }, o.yLabel));
+  /* Axis titles, set as a spectrum plot is conventionally read: the measured
+     quantity rotated up the Y axis, wavelength centred beneath the X axis.
+     Both are drawn in the primary ink rather than the faint tick colour -
+     they say what the chart is, and have to be legible at a glance. */
+  const ink2 = cssvar("--ink-2");
+  const BODY = "IBM Plex Sans, system-ui, sans-serif";
+  const ymid = (y0 + y1) / 2;
+  svg.appendChild(mk("text", {
+    x: 14, y: ymid, "text-anchor": "middle", fill: ink2,
+    "font-family": BODY, "font-size": 12, "font-weight": 600,
+    transform: `rotate(-90 14 ${ymid})`,
+  }, o.yLabel));
+  svg.appendChild(mk("text", {
+    x: (x0 + x1) / 2, y: y1 + (o.strip ? 45 : 34), "text-anchor": "middle",
+    fill: ink2, "font-family": BODY, "font-size": 12, "font-weight": 600,
+  }, o.xLabel || "Wavelength (nm)"));
 
   if (o.strip) {
     const defs = mk("defs", {}), gid = svg.id + "-spec";
@@ -146,8 +160,6 @@ function chart(svg, o) {
     defs.appendChild(lg); svg.appendChild(defs);
     svg.appendChild(mk("rect", { x: x0, y: y1 + 5, width: x1 - x0, height: 9, rx: 2,
       fill: `url(#${gid})`, stroke: line, "stroke-width": .5 }));
-    svg.appendChild(mk("text", { x: x1, y: y1 + 41, "text-anchor": "end", fill: ink3,
-      "font-family": MONO, "font-size": 9.5 }, "wavelength (nm) → near-infrared"));
   }
 
   if (o.rule != null) {
@@ -227,19 +239,44 @@ function blankChart(svg, msg) {
 }
 
 /* ================================================================ rendering */
+// The legend names exactly what is drawn: the live trace while live view is
+// showing, the measured spectrum once an analysis is on screen.
+function legend(mode) {
+  $("leg-meas").classList.toggle("hidden", mode !== "analysis");
+  $("leg-cont").classList.toggle("hidden", mode === "raw");
+  $("leg-live").classList.toggle("hidden", mode !== "live" && mode !== "raw");
+  $("leg-live-text").textContent = mode === "raw" ? "Live raw counts" : "Live reflectance";
+  if (mode !== "analysis") $("leg-fit").style.display = "none";
+}
+
 function renderCharts() {
   const a = S.analysis;
   if (S.streaming && S.live && !a) {
-    const wl = S.live.wavelength_nm, c = S.live.counts;
+    const L = S.live;
+    // With valid dark and white references the live frame arrives already
+    // processed by the analysis engine itself, so it is drawn by the very same
+    // code as an analysis result - same curves, same axes, same scaling.
+    // Pressing Run analysis then identifies exactly the spectrum on screen.
+    if (L.spectrum) {
+      $("spec-note").textContent = `live · ${L.frames} of ${L.frames_needed} frames averaged` +
+        ` · same processing as the analysis`;
+      drawSpectrum(L.spectrum, null, cssvar("--live"));
+      legend("live");
+      return;
+    }
+    const wl = L.wavelength_nm, c = L.counts;
     chart($("svg1"), {
-      margin: { l: 56, r: 16, t: 18, b: 50 }, strip: true,
+      margin: { l: 62, r: 16, t: 18, b: 52 }, strip: true,
       xDomain: [wl[0], wl[wl.length - 1]],
       yDomain: [0, Math.max(Math.max.apply(null, c) * 1.08, 1000)],
-      x: wl, yLabel: "RAW COUNTS", yFmt: (v) => (v / 1000).toFixed(0) + "k",
+      x: wl, yLabel: "Raw counts", yFmt: (v) => (v / 1000).toFixed(0) + "k",
       tipFmt: (v) => v.toFixed(0), tip: $("tip1"),
       series: [{ name: "Counts", y: c, color: cssvar("--live"), w: 1.6 }],
     });
-    blankChart($("svg2"), "Run an analysis to see absorption evidence");
+    $("spec-note").textContent = L.refl_unavailable
+      || "raw counts · take dark and white references to see reflectance";
+    legend("raw");
+    blankChart($("svg2"), "Take dark and white references to see reflectance");
     return;
   }
   if (!a) {
@@ -248,39 +285,53 @@ function renderCharts() {
     return;
   }
 
-  const sp = a.spectrum, wl = sp.wavelength_nm;
-  const all = sp.reflectance.concat(sp.continuum, sp.modelled && sp.modelled.length ? sp.modelled : []);
+  const wl = a.spectrum.wavelength_nm;
+  $("spec-note").textContent =
+    `${wl[0].toFixed(0)}–${wl[wl.length - 1].toFixed(0)} nm · SNR ${Math.round((a.quality || {}).snr || 0)}`;
+  drawSpectrum(a.spectrum, a, cssvar("--s1"));
+  legend("analysis");
+}
+
+/* Reflectance (Y) against wavelength (X), and its continuum-removed form.
+   Shared by the live view and by analysis results, so the two cannot drift
+   apart: ``a`` is the analysis (for fit and band markers) or null when live. */
+function drawSpectrum(sp, a, measuredColor) {
+  const wl = sp.wavelength_nm;
+  const hasFit = !!(sp.modelled && sp.modelled.length);
+  const all = sp.reflectance.concat(sp.continuum, hasFit ? sp.modelled : []);
   let ylo = Math.min.apply(null, all), yhi = Math.max.apply(null, all);
   const pad = (yhi - ylo) * 0.1 || 0.01;
-  $("leg-fit").style.display = (sp.modelled && sp.modelled.length) ? "" : "none";
+  $("leg-fit").style.display = hasFit ? "" : "none";
 
   chart($("svg1"), {
-    margin: { l: 56, r: 16, t: 18, b: 50 }, strip: true,
+    margin: { l: 62, r: 16, t: 18, b: 52 }, strip: true,
     xDomain: [wl[0], wl[wl.length - 1]], yDomain: [Math.max(0, ylo - pad), yhi + pad],
-    x: wl, yLabel: "REFLECTANCE", yFmt: (v) => v.toFixed(2),
+    x: wl, yLabel: "Reflectance", yFmt: (v) => v.toFixed(2),
     tipFmt: (v) => v.toFixed(4), tip: $("tip1"),
     series: [
       { name: "Continuum", y: sp.continuum, color: cssvar("--s-cont"), w: 1.4, dash: "5 4", dot: false },
-      { name: "Model fit", y: sp.modelled, color: cssvar("--s2"), w: 1.8, op: .95 },
-      { name: "Measured", y: sp.reflectance, color: cssvar("--s1"), w: 2.2 },
+      { name: "Model fit", y: hasFit ? sp.modelled : [], color: cssvar("--s2"), w: 1.8, op: .95 },
+      { name: "Measured", y: sp.reflectance, color: measuredColor, w: 2.2 },
     ],
   });
 
-  const meta = S.minerals[a.identification.mineral] || {};
-  const inRange = (meta.diagnostic_bands_nm || []).filter(
-    (c) => c >= wl[0] && c <= wl[wl.length - 1]);
   const markers = [];
-  inRange.forEach((c) => markers.push({ x: c, label: "expect " + c,
-    color: cssvar("--accent"), dash: "3 4", w: 1.4, op: .85, row: 0 }));
-  a.bands.slice().sort((x, y) => y.depth - x.depth).slice(0, 6).forEach((b) =>
-    markers.push({ x: b.centre_nm, label: Math.round(b.centre_nm),
-      color: cssvar("--s2"), w: 1.6, row: 1 }));
+  if (a) {
+    const meta = S.minerals[a.identification.mineral] || {};
+    const inRange = (meta.diagnostic_bands_nm || []).filter(
+      (c) => c >= wl[0] && c <= wl[wl.length - 1]);
+    inRange.forEach((c) => markers.push({ x: c, label: "expect " + c,
+      color: cssvar("--accent"), dash: "3 4", w: 1.4, op: .85, row: 0 }));
+    a.bands.slice().sort((x, y) => y.depth - x.depth).slice(0, 6).forEach((b) =>
+      markers.push({ x: b.centre_nm, label: Math.round(b.centre_nm),
+        color: cssvar("--s2"), w: 1.6, row: 1 }));
+  }
 
   chart($("svg2"), {
-    margin: { l: 56, r: 16, t: 34, b: 26 },
+    margin: { l: 62, r: 16, t: 34, b: 42 },
     xDomain: [wl[0], wl[wl.length - 1]],
     yDomain: [Math.max(0, Math.min.apply(null, sp.continuum_removed) - 0.04), 1.03], rule: 1,
-    x: wl, yLabel: "CONTINUUM REMOVED", yFmt: (v) => v.toFixed(2),
+    x: wl, yLabel: "Relative reflectance", yFmt: (v) => v.toFixed(2),
     tipFmt: (v) => ((1 - v) * 100).toFixed(2) + "% deep", tip: $("tip2"),
     markers: markers,
     series: [{ name: "Depth", y: sp.continuum_removed, color: cssvar("--s-cr"), w: 2.2 }],
@@ -703,7 +754,6 @@ $("btn-stream").onclick = async () => {
     await api("/api/stream/" + action, { method: "POST" });
     S.streaming = action === "start";
     $("btn-stream").textContent = S.streaming ? "Stop live" : "Live view";
-    $("leg-live").classList.toggle("hidden", !S.streaming);
     if (S.streaming) S.analysis = null;
     renderCharts();
   } catch (e) { toast(e.message, "bad"); }

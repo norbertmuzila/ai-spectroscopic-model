@@ -70,6 +70,13 @@ class State:
         self.clients: set = set()
         self.loop: asyncio.AbstractEventLoop | None = None
         self.last_analysis: dict | None = None
+        # Rolling window of raw frames behind the live view, and the combined
+        # spectrum currently on screen. Run analysis uses that exact spectrum
+        # while live view is on, so the result is of what the operator sees.
+        self.live_frames: list = []
+        self.live_key: tuple | None = None
+        self.live_counts: np.ndarray | None = None
+        self.live_time: float = 0.0
 
     def require_device(self):
         """
@@ -397,22 +404,73 @@ def simulator_sample(req: SimulatorSample):
 # ---------------------------------------------------------------------------
 #  Measurement + analysis
 # ---------------------------------------------------------------------------
+def _nonlinearity(dev):
+    return (dev.nonlinearity_coeffs
+            if CFG.get_path("instrument.nonlinearity_correction", True) else None)
+
+
+def _reference_problem(dev) -> str | None:
+    """Why the references cannot turn this device's counts into reflectance."""
+    if dev.dark is None and dev.white is None:
+        return "raw counts · take dark and white references to see reflectance"
+    if dev.white is None:
+        return "raw counts · take a white reference to see reflectance"
+    if dev.dark is None:
+        return "raw counts · take a dark reference to see reflectance"
+    for ref, name in ((dev.dark, "dark"), (dev.white, "white")):
+        if abs(ref.integration_time_ms - dev.integration_time_ms) > 1e-6:
+            return (f"raw counts · {name} reference was taken at "
+                    f"{ref.integration_time_ms:g} ms but integration is now "
+                    f"{dev.integration_time_ms:g} ms - retake references")
+    return None
+
+
+def _live_spectrum(dev, counts) -> dict:
+    """
+    The live frame through the analysis engine's own preprocessing, in the
+    exact shape an analysis reports its spectrum.
+    """
+    engine = ST.ensure_engine()
+    wl, ps, _lo, _hi, _trimmed = engine.reflectance(
+        dev.wavelengths(), counts, dark=dev.dark.counts, white=dev.white.counts,
+        nonlinearity_coeffs=_nonlinearity(dev))
+    step = float(np.median(np.diff(wl))) if wl.size > 1 else 1.0
+    stride = max(1, int(round(1.0 / step)))
+    return {
+        "wavelength_nm": [round(float(v), 2) for v in wl[::stride]],
+        "reflectance": [round(float(v), 5) for v in ps.reflectance[::stride]],
+        "continuum": [round(float(v), 5) for v in ps.continuum[::stride]],
+        "continuum_removed": [round(float(v), 5) for v in ps.continuum_removed[::stride]],
+        "modelled": [],
+    }
+
+
 def _run_analysis(dev, sample_label: str, scans: int | None, session_id: int | None,
                   notes: str = "") -> dict:
     engine = ST.ensure_engine()
-    counts = dev.acquire(scans)
+    # While live view is running and its window is full, analyse the very
+    # spectrum on screen instead of taking a new one, so the result is always
+    # the result for what the operator is looking at. A stale or partial window
+    # (sample just swapped, settings just changed) falls back to a fresh read.
+    live = (ST.streaming and ST.live_counts is not None
+            and time.time() - ST.live_time < 3.0
+            and ST.live_key == (dev.integration_time_ms, dev.scans_to_average,
+                                dev.boxcar_width)
+            and len(ST.live_frames) >= dev.scans_to_average
+            and (scans is None or scans == dev.scans_to_average))
+    counts = ST.live_counts.copy() if live else dev.acquire(scans)
     result = engine.analyze(
         wavelength_nm=dev.wavelengths(),
         values=counts,
         dark=dev.dark.counts if dev.dark else None,
         white=dev.white.counts if dev.white else None,
-        nonlinearity_coeffs=(dev.nonlinearity_coeffs
-                             if CFG.get_path("instrument.nonlinearity_correction", True)
-                             else None),
+        nonlinearity_coeffs=_nonlinearity(dev),
         sample_label=sample_label,
         reference_age_minutes=dev.reference_age_minutes(),
         metadata={
             "source": "live",
+            "acquired_from": ("live view window" if live else "fresh acquisition"),
+            "frames_averaged": int(dev.scans_to_average if live or scans is None else scans),
             "notes": notes,
             "device": dev.info(),
             "ground_truth": getattr(dev, "loaded_sample", None) if dev.is_simulated else None,
@@ -563,26 +621,44 @@ async def download_session_report(session_id: int):
 # ---------------------------------------------------------------------------
 async def _stream_loop():
     dev = ST.require_device()
+    ST.live_frames, ST.live_key, ST.live_counts = [], None, None
     while ST.streaming and ST.clients:
         try:
-            counts = await asyncio.to_thread(dev.acquire, 1)
+            frame = await asyncio.to_thread(dev.read_frame)
+            # The window is the analysis's own frame count, combined by the
+            # analysis's own sigma-clipped mean, so live noise and live shape
+            # are those of a measurement. Any settings change restarts it.
+            key = (dev.integration_time_ms, dev.scans_to_average, dev.boxcar_width)
+            if key != ST.live_key:
+                ST.live_frames, ST.live_key = [], key
+            ST.live_frames.append(frame)
+            del ST.live_frames[:-dev.scans_to_average]
+            counts = dev.combine(ST.live_frames)
+            ST.live_counts, ST.live_time = counts, time.time()
+
             wl = dev.wavelengths()
             stride = max(1, wl.size // 700)
-            await broadcast({
-                "type": "live",
-                "data": {
-                    "wavelength_nm": [round(float(v), 1) for v in wl[::stride]],
-                    "counts": [round(float(v), 1) for v in counts[::stride]],
-                    "peak_counts": float(counts.max()),
-                    "saturated": bool(counts.max() >= 65000),
-                    "t": time.time(),
-                },
-            })
+            data = {
+                "wavelength_nm": [round(float(v), 1) for v in wl[::stride]],
+                "counts": [round(float(v), 1) for v in counts[::stride]],
+                "peak_counts": float(frame.max()),
+                "saturated": bool(frame.max() >= 65000),
+                "frames": len(ST.live_frames),
+                "frames_needed": dev.scans_to_average,
+                "t": time.time(),
+            }
+            problem = _reference_problem(dev)
+            if problem:
+                data["refl_unavailable"] = problem
+            else:
+                data["spectrum"] = await asyncio.to_thread(_live_spectrum, dev, counts)
+            await broadcast({"type": "live", "data": data})
         except Exception as exc:
             await broadcast({"type": "error", "message": str(exc)})
             break
-        await asyncio.sleep(0.25)
+        await asyncio.sleep(0.05)
     ST.streaming = False
+    ST.live_counts = None
     await broadcast({"type": "streaming", "active": False})
 
 

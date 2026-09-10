@@ -103,7 +103,20 @@ class BaseSpectrometer:
         n = int(scans or self.scans_to_average)
         with self._lock:
             frames = [np.asarray(self._read_raw(), dtype=np.float64) for _ in range(n)]
+        return self.combine(frames)
 
+    def read_frame(self) -> np.ndarray:
+        """One raw detector frame, uncombined and unsmoothed."""
+        with self._lock:
+            return np.asarray(self._read_raw(), dtype=np.float64)
+
+    def combine(self, frames) -> np.ndarray:
+        """
+        The frame combine used by every measurement. The live view feeds its
+        rolling window through this too, so it is the same arithmetic as an
+        analysis rather than a look-alike.
+        """
+        n = len(frames)
         if n >= 3:
             stack = np.vstack(frames)
             med = np.median(stack, axis=0)

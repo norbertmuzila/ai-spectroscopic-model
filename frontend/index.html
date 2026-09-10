@@ -141,10 +141,10 @@
         <div class="tip" id="tip1"></div>
       </div>
       <div class="legend">
-        <span class="item"><span class="sw" style="border-top-color:var(--s1)"></span>Measured reflectance</span>
-        <span class="item"><span class="sw" style="border-top-color:var(--s-cont);border-top-style:dashed"></span>Convex-hull continuum</span>
+        <span class="item" id="leg-meas"><span class="sw" style="border-top-color:var(--s1)"></span>Measured reflectance</span>
+        <span class="item" id="leg-cont"><span class="sw" style="border-top-color:var(--s-cont);border-top-style:dashed"></span>Convex-hull continuum</span>
         <span class="item" id="leg-fit"><span class="sw" style="border-top-color:var(--s2)"></span>Unmixing model fit</span>
-        <span class="item hidden" id="leg-live"><span class="sw" style="border-top-color:var(--live)"></span>Live raw counts</span>
+        <span class="item hidden" id="leg-live"><span class="sw" style="border-top-color:var(--live)"></span><span id="leg-live-text">Live reflectance</span></span>
       </div>
     </section>
 
@@ -154,7 +154,7 @@
         <span class="note">band position identifies the mineral; depth tracks abundance</span>
       </div>
       <div class="figure" id="fig2">
-        <svg id="svg2" viewBox="0 0 920 248" width="920" height="248" role="img" aria-label="Continuum-removed spectrum"></svg>
+        <svg id="svg2" viewBox="0 0 920 262" width="920" height="262" role="img" aria-label="Continuum-removed spectrum"></svg>
         <div class="tip" id="tip2"></div>
       </div>
       <div class="legend">

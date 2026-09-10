@@ -380,20 +380,17 @@ class AnalysisEngine:
         return lines
 
     # ==================================================================
-    def analyze(self, *,
-                wavelength_nm: np.ndarray,
-                values: np.ndarray,
-                dark: np.ndarray | None = None,
-                white: np.ndarray | None = None,
-                already_reflectance: bool = False,
-                nonlinearity_coeffs=None,
-                sample_label: str = "Unlabelled sample",
-                reference_age_minutes: float | None = None,
-                metadata: dict | None = None) -> AnalysisResult:
-        t_start = time.time()
-        self._counter += 1
-        analysis_id = f"A{int(t_start)}-{self._counter:04d}"
+    def reflectance(self, wavelength_nm, values, *, dark=None, white=None,
+                    already_reflectance: bool = False, nonlinearity_coeffs=None):
+        """
+        Counts -> reflectance on the analysis grid, over the trusted range.
 
+        This is the single definition of "the spectrum". ``analyze`` runs it
+        first, and the live view calls it on every frame, so the curve on the
+        live plot is exactly the curve the analysis identifies - same
+        references, nonlinearity correction, range trim, resampling and
+        smoothing. Returns ``(wl, processed, lo, hi, trimmed)``.
+        """
         wl_src = np.asarray(wavelength_nm, dtype=np.float64)
         lo = max(float(wl_src.min()), self.instrument_range[0], float(self.grid.min()))
         hi = min(float(wl_src.max()), self.instrument_range[1], float(self.grid.max()))
@@ -411,11 +408,33 @@ class AnalysisEngine:
             lo, hi = float(self.grid.min()), float(self.grid.max())
         wl = self.grid[gmask]
 
-        # 1. Preprocess ------------------------------------------------
         ps = prep.process(wl_src, values, wl,
                           dark=dark, white=white,
                           already_reflectance=already_reflectance,
                           nonlinearity_coeffs=nonlinearity_coeffs)
+        return wl, ps, lo, hi, trimmed
+
+    # ==================================================================
+    def analyze(self, *,
+                wavelength_nm: np.ndarray,
+                values: np.ndarray,
+                dark: np.ndarray | None = None,
+                white: np.ndarray | None = None,
+                already_reflectance: bool = False,
+                nonlinearity_coeffs=None,
+                sample_label: str = "Unlabelled sample",
+                reference_age_minutes: float | None = None,
+                metadata: dict | None = None) -> AnalysisResult:
+        t_start = time.time()
+        self._counter += 1
+        analysis_id = f"A{int(t_start)}-{self._counter:04d}"
+
+        # 1. Preprocess ------------------------------------------------
+        wl, ps, lo, hi, trimmed = self.reflectance(
+            wavelength_nm, values, dark=dark, white=white,
+            already_reflectance=already_reflectance,
+            nonlinearity_coeffs=nonlinearity_coeffs)
+        gmask = (self.grid >= wl[0]) & (self.grid <= wl[-1])
 
         # 2. Quality ---------------------------------------------------
         qc = qcmod.assess(
