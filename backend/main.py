@@ -654,4 +654,14 @@ def index():
         tag = '<script src="/static/app.js">'
         inject = f"<script>window.__SPECTRO_TOKEN__={json.dumps(pw)};</script>"
         html = html.replace(tag, inject + tag)
-    return HTMLResponse(html)
+
+    # Version the asset URLs by modification time. Without this a browser can
+    # keep running a cached app.js after a fix has shipped - which is how a
+    # correction to authentication would appear not to have worked at all.
+    for asset in ("app.js", "styles.css"):
+        try:
+            v = int((FRONTEND / asset).stat().st_mtime)
+            html = html.replace(f'/static/{asset}"', f'/static/{asset}?v={v}"')
+        except OSError:
+            pass
+    return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
