@@ -1,0 +1,711 @@
+<title>MRS-MIT Reference Spectra — splib07a</title>
+<style>
+
+:root {
+  --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'URW Palladio L', serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono', monospace;
+
+  /* Monokai, shifted to a dark blue/navy ground, recolored for
+     deuteranopia/protanopia/tritanopia safety: every marker below
+     also carries a distinct symbol/text so no meaning rides on hue alone. */
+  --bg: #0D1B2E;
+  --bg-raised: #13233D;
+  --ink: #E9E6DC;
+  --ink-soft: #B9C1D4;
+  --muted: #7C88A6;
+  --rule: #24344F;
+  --rule-soft: #1B2B45;
+  --accent: #FF6AC1;
+  --accent-soft: #4A2A44;
+  --accent-wash: #271A30;
+  --sage: #4FC3F7;
+  --sage-wash: #142A38;
+  --mono-bg: #16273F;
+  --shadow: rgba(0, 0, 0, 0.45);
+  --cyan: #E9C46A;
+  --gold: #FD971F;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 48px 48px 96px;
+}
+
+header.masthead {
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 20px;
+  margin-bottom: 8px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 10px;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 600;
+  line-height: 1.15;
+  margin: 0 0 10px;
+  text-wrap: balance;
+  color: var(--ink);
+}
+
+.dek {
+  font-size: 15px;
+  color: var(--ink-soft);
+  max-width: 62ch;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.provenance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+}
+
+.prov-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.prov-label {
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.prov-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.notice {
+  margin: 28px 0 40px;
+  padding: 14px 18px;
+  background: var(--sage-wash);
+  border-left: 3px solid var(--sage);
+  border-radius: 2px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.notice strong { color: var(--ink); }
+
+section.group {
+  margin-bottom: 44px;
+}
+
+.group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.group-tier {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--bg);
+  background: var(--accent);
+  padding: 3px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.group-title {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+.group-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 4px 0 16px;
+  max-width: 68ch;
+  line-height: 1.5;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--bg-raised);
+  box-shadow: 0 1px 2px var(--shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  min-width: 1040px;
+}
+
+thead th {
+  text-align: left;
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--rule-soft);
+}
+
+tbody td {
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--rule-soft);
+  color: var(--ink-soft);
+  vertical-align: top;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+
+tbody tr:hover td { background: var(--accent-wash); }
+
+td.mineral {
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+td.filename {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--cyan);
+  background: var(--mono-bg);
+  border-radius: 3px;
+}
+
+td.range {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+tr.flagged td.filename { background: transparent; }
+
+.flag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  border: 1px solid var(--accent-soft);
+  background: var(--accent-wash);
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+td.bands {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.splice-mark {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+td.formula {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.variable-mark {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 9.5px;
+  color: var(--bg);
+  background: var(--sage);
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+  text-align: center;
+  margin-left: 5px;
+  cursor: help;
+}
+
+footer {
+  margin-top: 56px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+footer code {
+  font-family: var(--font-mono);
+  background: var(--mono-bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--ink-soft);
+}
+
+/* --- range & histogram charts --- */
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 4px 0 18px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.legend-swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.chart-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--bg-raised);
+  box-shadow: 0 1px 2px var(--shadow);
+  padding: 8px 4px;
+}
+
+.range-svg, .hist-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--font-body);
+}
+
+.chart-axis-label {
+  font-size: 10.5px;
+  fill: var(--muted);
+}
+
+.chart-gridline {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.chart-baseline {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.row-label {
+  font-size: 11px;
+  fill: var(--ink-soft);
+}
+
+.row-label-hover {
+  fill: var(--ink);
+}
+
+.range-bar {
+  stroke-linecap: round;
+}
+
+.range-dot {
+  stroke: var(--bg-raised);
+  stroke-width: 2;
+}
+
+.group-tick-label {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.hist-bar {
+  transition: opacity 0.1s ease;
+}
+
+.hist-bar:hover {
+  opacity: 0.8;
+}
+
+.chart-tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: var(--bg-raised);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 8px 11px;
+  font-size: 12px;
+  color: var(--ink);
+  box-shadow: 0 4px 16px var(--shadow);
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.08s ease;
+  max-width: 240px;
+}
+
+.chart-tooltip.visible { opacity: 1; }
+
+.chart-tooltip .tt-title {
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.chart-tooltip .tt-row {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+@media (max-width: 600px) {
+  .page { padding: 40px 18px 72px; }
+  .provenance { gap: 12px 20px; }
+}
+
+</style>
+
+
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">USGS Spectral Library · splib07a · Chapter M — Minerals</p>
+    <h1>MRS Mid-Importance Target Spectra</h1>
+    <p class="dek">Reflectance spectrum filenames for the two mineral classes flagged as mid-priority (MRS&nbsp;&ndash;&nbsp;MIT) in Abstract&nbsp;EANA2026-69: sulfate evaporites (gypsum, jarosite, kieserite, bassanite) and iron oxides.</p>
+    <div class="provenance">
+      <div class="prov-item">
+        <span class="prov-label">Source folder</span>
+        <span class="prov-value">GIFplots_splib07a/ChapterM_Minerals</span>
+      </div>
+      <div class="prov-item">
+        <span class="prov-label">Spectrometer</span>
+        <span class="prov-value">Beckman 5270 (BECK), 0.2–3 µm</span>
+      </div>
+      <div class="prov-item">
+        <span class="prov-label">Product type</span>
+        <span class="prov-value">AREF (absolute reflectance)</span>
+      </div>
+      <div class="prov-item">
+        <span class="prov-label">Species matched</span>
+        <span class="prov-value">8 of 8</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="notice">
+    <strong>One file per species.</strong> Same selection method as the MRS-HIT page: one representative BECK_AREF file per species (Beckman covers 0.2&ndash;3&nbsp;&micro;m, the widest overlap with the 0.25&ndash;3.5&nbsp;&micro;m target range). No ASD fallback was needed for this tier — every species here has a Beckman measurement in splib07a.
+  </div>
+
+  <div class="notice" style="background: var(--accent-wash); border-left-color: var(--accent);">
+    <strong>Detected Bands</strong> use a lower peak-prominence threshold (0.003 vs. 0.01 on the HIT page) because several MIT/LIT spectra are relatively flat and produced zero bands at the HIT threshold (e.g. Goethite, Orthoclase). This surfaces real but weaker features — treat MIT/LIT band counts as not directly comparable in magnitude to HIT's, since the detection sensitivity differs. Values marked <span class="splice-mark">*</span> fall in the ~0.95&ndash;1.15&nbsp;&micro;m or ~1.75&ndash;1.85&nbsp;&micro;m windows, where ASD/Beckman detector-splice joins are known to introduce artifacts (per ds1035.pdf).
+  </div>
+
+  <div class="notice" style="background: var(--sage-wash); border-left-color: var(--sage);">
+    <strong>Formulas</strong> are idealized end-member compositions from standard mineralogical references, not derived from ds1035.pdf or the spectral data itself. Hematite and Maghemite share the same stoichiometry (Fe&#8322;O&#8323;) but differ in crystal structure &mdash; Maghemite is shown as &gamma;-Fe&#8322;O&#8323; to distinguish it.
+  </div>
+
+  <section class="group">
+    <div class="group-head">
+      <span class="group-tier">MIT · 1 of 2</span>
+      <h2 class="group-title">Sulfate Evaporites</h2>
+    </div>
+    <p class="group-sub">Gypsum, jarosite, kieserite, bassanite &mdash; the four species the abstract names explicitly under MRS-MIT. Bands from SO&#8324; and structural H&#8322;O sit mainly at 1.4&ndash;2.5&nbsp;&micro;m, outside the USB4000's 0.2&ndash;1.1&nbsp;&micro;m range.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Mineral</th><th>Formula</th><th>Sample ID</th><th>Detected Bands (µm)</th><th>Filename</th></tr></thead>
+        <tbody id="sulfate-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="group-head">
+      <span class="group-tier">MIT · 2 of 2</span>
+      <h2 class="group-title">Iron Oxides</h2>
+    </div>
+    <p class="group-sub">Hematite, goethite, maghemite, lepidocrocite. Fe&sup3;&#8314; electronic transition bands near 0.53 and 0.85&ndash;0.9&nbsp;&micro;m are genuinely visible in Vis-NIR &mdash; the one mineral class in this abstract with real USB4000-range diagnostic signal, per Viviano-Beck et&nbsp;al. 2014.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Mineral</th><th>Formula</th><th>Sample ID</th><th>Detected Bands (µm)</th><th>Filename</th></tr></thead>
+        <tbody id="ironoxide-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="group" id="chart-section">
+    <div class="group-head">
+      <h2 class="group-title">Bands Inside vs. Outside USB4000 Range</h2>
+    </div>
+    <p class="group-sub">Per mineral: how many of its detected bands fall inside the USB4000's 0.20&ndash;1.10&nbsp;&micro;m window versus outside it, grouped into the two MRS-MIT classes. As on the HIT page, a count alone is not a diagnosis &mdash; identification needs a specific co-occurring <em>pattern</em> of bands, not just band presence.</p>
+
+    <div class="notice" style="background: var(--accent-wash); border-left-color: var(--accent); margin: 4px 0 24px;">
+      <strong>1 of 8 minerals have zero detected bands inside 0.20&ndash;1.10&nbsp;&micro;m</strong>, 4 have exactly one, and 3 have two or more &mdash; concentrated in the iron oxides, consistent with their Fe&sup3;&#8314; electronic-transition bands sitting in Vis-NIR rather than SWIR.
+    </div>
+
+    <div class="chart-legend" id="chart-legend"></div>
+
+    <div class="chart-wrap">
+      <svg id="inrange-chart" class="range-svg"></svg>
+    </div>
+  </section>
+
+  <footer>
+    Filenames follow splib07a convention: <code>splib07a_&lt;Mineral&gt;_&lt;SampleID&gt;_&lt;Spectrometer+Purity&gt;_&lt;ProductType&gt;.gif</code> (shown), paired with the identically-named <code>.txt</code> file in <code>ASCIIdata_splib07a/ChapterM_Minerals</code> used for band detection. Instrument ranges per <code>ds1035.pdf</code> Table 1: BECK 0.20&ndash;3.00&nbsp;&micro;m, ASD (FR/HR/NG variants) 0.35&ndash;2.50&nbsp;&micro;m. See the MRS-HIT page for phyllosilicates, broader hydrated sulfates, hydrated silica, and carbonates.
+  </footer>
+
+</div>
+
+<script>
+const DATA = {"Sulfate Evaporites": [{"mineral": "Gypsum", "formula": "CaSO₄·2H₂O", "variable": false, "filename": "splib07a_Gypsum_HS333.3B_(Selenite)_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "0.994*; 1.198; 1.448; 1.756*; 1.945"}, {"mineral": "Bassanite", "formula": "CaSO₄·0.5H₂O", "variable": false, "filename": "splib07a_Bassanite_GDS145_(syn)_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.168; 1.428; 1.772*; 1.935; 2.816"}, {"mineral": "Kieserite", "formula": "MgSO₄·H₂O", "variable": false, "filename": "splib07a_Kieserite_KIEDE1.a_crse_gr_ASDFRc_AREF.gif", "range": "0.35–2.50", "bands": "1.033*; 1.55; 1.623; 2.134; 2.4"}, {"mineral": "Jarosite", "formula": "KFe³⁺₃(SO₄)₂(OH)₆", "variable": false, "filename": "splib07a_Jarosite_GDS100_Na_90C_Syn_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "0.434; 0.894; 1.478; 1.955; 2.265"}], "Iron Oxides": [{"mineral": "Hematite", "formula": "Fe₂O₃", "variable": false, "filename": "splib07a_Hematite_FE2602_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.289; 0.515; 0.859; 1.409; 2.816"}, {"mineral": "Goethite", "formula": "FeO(OH)", "variable": false, "filename": "splib07a_Goethite_HS36.3_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.941"}, {"mineral": "Maghemite", "formula": "γ-Fe₂O₃", "variable": false, "filename": "splib07a_Maghemite_GDS81_Syn_(M-3)_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.964*; 1.498; 1.935"}, {"mineral": "Lepidocrocite", "formula": "FeO(OH)", "variable": false, "filename": "splib07a_Lepidocrocite_GDS80_(Syn)_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.652; 0.933; 1.448; 1.945"}]};
+
+function parseRow(f) {
+  const base = f.replace(/^splib07a_/, '').replace(/\.gif$/, '');
+  const parts = base.split('_');
+  const mineral = parts[0];
+  const rest = parts.slice(1, -2).join('_');
+  return { mineral, sampleId: rest || '—' };
+}
+
+function formatBands(bands) {
+  return bands
+    .split(';')
+    .map(b => b.trim())
+    .map(b => b.endsWith('*') ? `${b.slice(0, -1)}<span class="splice-mark">*</span>` : b)
+    .join(', ');
+}
+
+function renderTable(tbodyId, entries) {
+  const tbody = document.getElementById(tbodyId);
+  entries.forEach(({ mineral, formula, variable, filename, range, bands, flag }) => {
+    const { sampleId } = parseRow(filename);
+    const tr = document.createElement('tr');
+    if (flag) tr.className = 'flagged';
+    tr.innerHTML = `
+      <td class="mineral">${mineral}${flag ? `<span class="flag">${flag}</span>` : ''}</td>
+      <td class="formula">${formula}${variable ? `<span class="variable-mark" title="Variable composition (solid solution) — formula shown is a representative form">v</span>` : ''}</td>
+      <td>${sampleId}</td>
+      <td class="bands">${formatBands(bands)}</td>
+      <td class="filename">${filename}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+renderTable('sulfate-body', DATA['Sulfate Evaporites']);
+renderTable('ironoxide-body', DATA['Iron Oxides']);
+
+/* ============ in-range chart ============ */
+
+const INRANGE_DATA = [{"mineral": "Gypsum", "group": "Sulfate Evaporites", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [0.994], "out_range_vals": [1.198, 1.448, 1.756, 1.945]}, {"mineral": "Bassanite", "group": "Sulfate Evaporites", "total": 5, "in_range": 0, "out_range": 5, "in_range_vals": [], "out_range_vals": [1.168, 1.428, 1.772, 1.935, 2.816]}, {"mineral": "Kieserite", "group": "Sulfate Evaporites", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [1.033], "out_range_vals": [1.55, 1.623, 2.134, 2.4]}, {"mineral": "Jarosite", "group": "Sulfate Evaporites", "total": 5, "in_range": 2, "out_range": 3, "in_range_vals": [0.434, 0.894], "out_range_vals": [1.478, 1.955, 2.265]}, {"mineral": "Hematite", "group": "Iron Oxides", "total": 5, "in_range": 3, "out_range": 2, "in_range_vals": [0.289, 0.515, 0.859], "out_range_vals": [1.409, 2.816]}, {"mineral": "Goethite", "group": "Iron Oxides", "total": 1, "in_range": 1, "out_range": 0, "in_range_vals": [0.941], "out_range_vals": []}, {"mineral": "Maghemite", "group": "Iron Oxides", "total": 3, "in_range": 1, "out_range": 2, "in_range_vals": [0.964], "out_range_vals": [1.498, 1.935]}, {"mineral": "Lepidocrocite", "group": "Iron Oxides", "total": 4, "in_range": 2, "out_range": 2, "in_range_vals": [0.652, 0.933], "out_range_vals": [1.448, 1.945]}];
+
+const RANGE_COLOR = '#3987e5';   // in-range (USB4000-visible) — blue
+const OUT_COLOR = '#5a6478';     // out-of-range — recessive neutral, not a competing hue
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs) {
+  const el = document.createElementNS(SVG_NS, tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+
+const tooltip = document.createElement('div');
+tooltip.className = 'chart-tooltip';
+document.body.appendChild(tooltip);
+function showTooltip(evt, html) {
+  tooltip.innerHTML = html;
+  tooltip.classList.add('visible');
+  moveTooltip(evt);
+}
+function moveTooltip(evt) {
+  const pad = 14;
+  let x = evt.clientX + pad;
+  let y = evt.clientY + pad;
+  const rect = tooltip.getBoundingClientRect();
+  if (x + rect.width > window.innerWidth - 8) x = evt.clientX - rect.width - pad;
+  if (y + rect.height > window.innerHeight - 8) y = evt.clientY - rect.height - pad;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+function hideTooltip() {
+  tooltip.classList.remove('visible');
+}
+
+const GROUP_ORDER = ["Sulfate Evaporites", "Iron Oxides"];
+const GROUP_TEXT_COLOR = {"Sulfate Evaporites": "#3987e5", "Iron Oxides": "#d95926"};
+
+function renderLegend() {
+  const el = document.getElementById('chart-legend');
+  const items = [
+    { label: 'Bands inside USB4000 range (0.20–1.10 µm)', color: RANGE_COLOR },
+    { label: 'Bands outside USB4000 range', color: OUT_COLOR },
+  ];
+  items.forEach(it => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `<span class="legend-swatch" style="background:${it.color}"></span>${it.label}`;
+    el.appendChild(item);
+  });
+}
+renderLegend();
+
+function renderInRangeChart() {
+  const svg = document.getElementById('inrange-chart');
+  const rows = [...INRANGE_DATA].sort((a, b) => {
+    if (GROUP_ORDER.indexOf(a.group) !== GROUP_ORDER.indexOf(b.group)) {
+      return GROUP_ORDER.indexOf(a.group) - GROUP_ORDER.indexOf(b.group);
+    }
+    if (b.in_range !== a.in_range) return b.in_range - a.in_range;
+    return a.mineral.localeCompare(b.mineral);
+  });
+
+  const marginTop = 20, marginBottom = 40, marginLeft = 168, marginRight = 40;
+  const rowH = 15, groupGap = 16;
+  const plotW = 560;
+  const maxTotal = Math.max(...rows.map(r => r.total));
+
+  let y = marginTop;
+  let lastGroup = null;
+  const positions = [];
+  const groupBounds = {};
+  rows.forEach((r) => {
+    if (lastGroup !== null && r.group !== lastGroup) y += groupGap;
+    if (!groupBounds[r.group]) groupBounds[r.group] = { start: y };
+    groupBounds[r.group].end = y;
+    positions.push(y);
+    y += rowH;
+    lastGroup = r.group;
+  });
+  const plotBottom = y;
+  const totalW = marginLeft + plotW + marginRight;
+  const totalH = plotBottom + marginBottom;
+
+  svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+  svg.innerHTML = '';
+
+  const xScale = v => marginLeft + (v / maxTotal) * plotW;
+
+  for (let v = 0; v <= maxTotal; v++) {
+    const x = xScale(v);
+    svg.appendChild(svgEl('line', {
+      x1: x, x2: x, y1: marginTop - 4, y2: plotBottom,
+      class: 'chart-gridline',
+    }));
+    const lbl = svgEl('text', { x, y: plotBottom + 16, class: 'chart-axis-label', 'text-anchor': 'middle' });
+    lbl.textContent = v;
+    svg.appendChild(lbl);
+  }
+  const xAxisLabel = svgEl('text', { x: marginLeft + plotW / 2, y: totalH - 6, class: 'chart-axis-label', 'text-anchor': 'middle' });
+  xAxisLabel.textContent = 'Detected bands';
+
+  GROUP_ORDER.forEach(g => {
+    const b = groupBounds[g];
+    if (!b) return;
+    const midY = (b.start + b.end) / 2 + rowH / 2;
+    const lbl = svgEl('text', {
+      x: 8, y: midY, class: 'group-tick-label', 'text-anchor': 'start',
+      fill: GROUP_TEXT_COLOR[g] || 'var(--muted)',
+    });
+    lbl.textContent = g;
+    svg.appendChild(lbl);
+  });
+  svg.appendChild(xAxisLabel);
+
+  rows.forEach((r, i) => {
+    const rowY = positions[i];
+    const cy = rowY + rowH / 2;
+    const barH = 10;
+    const barY = cy - barH / 2;
+
+    const g = svgEl('g', { class: 'inrange-row' });
+
+    const label = svgEl('text', {
+      x: marginLeft - 10, y: cy + 4, class: 'row-label', 'text-anchor': 'end',
+    });
+    label.textContent = r.mineral;
+    g.appendChild(label);
+
+    const inW = (r.in_range / maxTotal) * plotW;
+    if (r.in_range > 0) {
+      g.appendChild(svgEl('rect', {
+        x: marginLeft, y: barY, width: Math.max(inW - 1, 0), height: barH,
+        fill: RANGE_COLOR, rx: 2,
+      }));
+    }
+    const outX = marginLeft + inW + (r.in_range > 0 && r.out_range > 0 ? 2 : 0);
+    const outW = (r.out_range / maxTotal) * plotW;
+    if (r.out_range > 0) {
+      g.appendChild(svgEl('rect', {
+        x: outX, y: barY, width: Math.max(outW - 1, 0), height: barH,
+        fill: OUT_COLOR, rx: 2,
+      }));
+    }
+
+    const hit = svgEl('rect', {
+      x: marginLeft - 160, y: rowY, width: plotW + 160, height: rowH, fill: 'transparent',
+    });
+    hit.style.cursor = 'pointer';
+    hit.addEventListener('mousemove', (evt) => {
+      label.classList.add('row-label-hover');
+      const inStr = r.in_range_vals.length ? r.in_range_vals.map(v => v.toFixed(3)).join(', ') : '—';
+      const outStr = r.out_range_vals.length ? r.out_range_vals.map(v => v.toFixed(3)).join(', ') : '—';
+      showTooltip(evt, `<div class="tt-title">${r.mineral}</div>
+        <div class="tt-row">${r.group}</div>
+        <div class="tt-row">In range (${r.in_range}): ${inStr}</div>
+        <div class="tt-row">Out of range (${r.out_range}): ${outStr}</div>`);
+    });
+    hit.addEventListener('mouseleave', () => {
+      label.classList.remove('row-label-hover');
+      hideTooltip();
+    });
+    g.appendChild(hit);
+
+    svg.appendChild(g);
+  });
+}
+renderInRangeChart();
+
+</script>

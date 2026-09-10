@@ -1,0 +1,752 @@
+<title>MRS-HIT Reference Spectra — splib07a</title>
+<style>
+
+:root {
+  --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'URW Palladio L', serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono', monospace;
+
+  /* Monokai, shifted to a dark blue/navy ground, recolored for
+     deuteranopia/protanopia/tritanopia safety: every marker below
+     also carries a distinct symbol/text so no meaning rides on hue alone. */
+  --bg: #0D1B2E;
+  --bg-raised: #13233D;
+  --ink: #E9E6DC;
+  --ink-soft: #B9C1D4;
+  --muted: #7C88A6;
+  --rule: #24344F;
+  --rule-soft: #1B2B45;
+  --accent: #FF6AC1;
+  --accent-soft: #4A2A44;
+  --accent-wash: #271A30;
+  --sage: #4FC3F7;
+  --sage-wash: #142A38;
+  --mono-bg: #16273F;
+  --shadow: rgba(0, 0, 0, 0.45);
+  --cyan: #E9C46A;
+  --gold: #FD971F;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 48px 48px 96px;
+}
+
+header.masthead {
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 20px;
+  margin-bottom: 8px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 10px;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 600;
+  line-height: 1.15;
+  margin: 0 0 10px;
+  text-wrap: balance;
+  color: var(--ink);
+}
+
+.dek {
+  font-size: 15px;
+  color: var(--ink-soft);
+  max-width: 62ch;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.provenance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+}
+
+.prov-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.prov-label {
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.prov-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.notice {
+  margin: 28px 0 40px;
+  padding: 14px 18px;
+  background: var(--sage-wash);
+  border-left: 3px solid var(--sage);
+  border-radius: 2px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.notice strong { color: var(--ink); }
+
+section.group {
+  margin-bottom: 44px;
+}
+
+.group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.group-tier {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--bg);
+  background: var(--accent);
+  padding: 3px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.group-title {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+.group-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 4px 0 16px;
+  max-width: 68ch;
+  line-height: 1.5;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--bg-raised);
+  box-shadow: 0 1px 2px var(--shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  min-width: 1040px;
+}
+
+thead th {
+  text-align: left;
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--rule-soft);
+}
+
+tbody td {
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--rule-soft);
+  color: var(--ink-soft);
+  vertical-align: top;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+
+tbody tr:hover td { background: var(--accent-wash); }
+
+td.mineral {
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+td.filename {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--cyan);
+  background: var(--mono-bg);
+  border-radius: 3px;
+}
+
+td.range {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+tr.flagged td.filename { background: transparent; }
+
+.flag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  border: 1px solid var(--accent-soft);
+  background: var(--accent-wash);
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+td.bands {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.splice-mark {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+td.formula {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.variable-mark {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 9.5px;
+  color: var(--bg);
+  background: var(--sage);
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+  text-align: center;
+  margin-left: 5px;
+  cursor: help;
+}
+
+footer {
+  margin-top: 56px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+footer code {
+  font-family: var(--font-mono);
+  background: var(--mono-bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--ink-soft);
+}
+
+/* --- range & histogram charts --- */
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 4px 0 18px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.legend-swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.chart-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--bg-raised);
+  box-shadow: 0 1px 2px var(--shadow);
+  padding: 8px 4px;
+}
+
+.range-svg, .hist-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--font-body);
+}
+
+.chart-axis-label {
+  font-size: 10.5px;
+  fill: var(--muted);
+}
+
+.chart-gridline {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.chart-baseline {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.row-label {
+  font-size: 11px;
+  fill: var(--ink-soft);
+}
+
+.row-label-hover {
+  fill: var(--ink);
+}
+
+.range-bar {
+  stroke-linecap: round;
+}
+
+.range-dot {
+  stroke: var(--bg-raised);
+  stroke-width: 2;
+}
+
+.group-tick-label {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.hist-bar {
+  transition: opacity 0.1s ease;
+}
+
+.hist-bar:hover {
+  opacity: 0.8;
+}
+
+.chart-tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: var(--bg-raised);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 8px 11px;
+  font-size: 12px;
+  color: var(--ink);
+  box-shadow: 0 4px 16px var(--shadow);
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.08s ease;
+  max-width: 240px;
+}
+
+.chart-tooltip.visible { opacity: 1; }
+
+.chart-tooltip .tt-title {
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.chart-tooltip .tt-row {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+@media (max-width: 600px) {
+  .page { padding: 40px 18px 72px; }
+  .provenance { gap: 12px 20px; }
+}
+
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">USGS Spectral Library · splib07a · Chapter M — Minerals</p>
+    <h1>MRS High-Importance Target Spectra</h1>
+    <p class="dek">Reflectance spectrum filenames for the four mineral classes flagged as astrobiologically high-priority (MRS&nbsp;–&nbsp;HIT) in Abstract&nbsp;EANA2026-69: phyllosilicates, hydrated sulfates, hydrated silica, and carbonates.</p>
+    <div class="provenance">
+      <div class="prov-item">
+        <span class="prov-label">Source folder</span>
+        <span class="prov-value">GIFplots_splib07a/ChapterM_Minerals</span>
+      </div>
+      <div class="prov-item">
+        <span class="prov-label">Spectrometer</span>
+        <span class="prov-value">Beckman 5270 (BECK), 0.2–3 µm</span>
+      </div>
+      <div class="prov-item">
+        <span class="prov-label">Product type</span>
+        <span class="prov-value">AREF (absolute reflectance)</span>
+      </div>
+      <div class="prov-item">
+        <span class="prov-label">Species matched</span>
+        <span class="prov-value">62 of 62</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="notice">
+    <strong>One file per species.</strong> Most species have multiple samples (different grain sizes, localities, purities) — this chart lists one representative BECK_AREF file each, chosen because the Beckman's 0.2–3 µm range covers the most of your target 0.25–3.5 µm span. Where no BECK measurement exists for a species, the next-best ASD file (0.35–2.5 µm) is used instead, marked <span class="flag">ASD</span>. Every other sample for a species sits alongside it in the same source folder, sharing its filename prefix.
+  </div>
+
+  <div class="notice" style="background: var(--accent-wash); border-left-color: var(--accent);">
+    <strong>Detected Bands</strong> are the five most prominent reflectance minima (absorption features) found per spectrum, computed from the splib07a ASCII reflectance data via <code style="font-family: var(--font-mono); background: var(--mono-bg); padding: 1px 5px; border-radius: 3px;">scipy.signal.find_peaks</code> on the smoothed, inverted curve — not read from the GIF plots. Values marked <span class="splice-mark">*</span> fall in the ~0.95–1.15 µm or ~1.75–1.85 µm windows, where ASD/Beckman detector-splice joins are known to introduce artifacts (per ds1035.pdf); treat these as possible instrumental artifacts rather than confirmed mineral bands. This is an automated, unreviewed extraction — not a substitute for checking against the literature or the source plots.
+  </div>
+
+  <div class="notice" style="background: var(--sage-wash); border-left-color: var(--sage);">
+    <strong>Formulas</strong> are idealized end-member compositions from standard mineralogical references, not derived from ds1035.pdf or the spectral data itself (neither source contains chemistry). Species marked <span class="variable-mark">v</span> are solid solutions with genuinely variable composition (element substitution across a range) — the formula shown is a representative/simplified form, not a fixed stoichiometry.
+  </div>
+
+  <section class="group">
+    <div class="group-head">
+      <span class="group-tier">HIT · 1 of 4</span>
+      <h2 class="group-title">Phyllosilicates</h2>
+    </div>
+    <p class="group-sub">Clay / sheet-silicate species — diagnostic Al–OH, Mg–OH and H₂O bands sit mostly at 1.4, 1.9, and 2.2–2.3 µm, outside the USB4000's 0.2–1.1 µm range.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Mineral</th><th>Formula</th><th>Sample ID</th><th>Detected Bands (µm)</th><th>Filename</th></tr></thead>
+        <tbody id="phyllo-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="group-head">
+      <span class="group-tier">HIT · 2 of 4</span>
+      <h2 class="group-title">Hydrated Sulfates</h2>
+    </div>
+    <p class="group-sub">Broader hydrated-sulfate species beyond the four sulfate evaporites named under MRS-MIT (gypsum, jarosite, kieserite, bassanite — see the MIT page). Bands from SO₄ and structural H₂O appear mainly at 1.4–2.5 µm.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Mineral</th><th>Formula</th><th>Sample ID</th><th>Detected Bands (µm)</th><th>Filename</th></tr></thead>
+        <tbody id="sulfate-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="group-head">
+      <span class="group-tier">HIT · 3 of 4</span>
+      <h2 class="group-title">Hydrated Silica</h2>
+    </div>
+    <p class="group-sub">Opal and chalcedony — Si–OH and H₂O features near 1.4, 1.9, and 2.2 µm. Smallest species count of the four HIT classes in this library.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Mineral</th><th>Formula</th><th>Sample ID</th><th>Detected Bands (µm)</th><th>Filename</th></tr></thead>
+        <tbody id="silica-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="group-head">
+      <span class="group-tier">HIT · 4 of 4</span>
+      <h2 class="group-title">Carbonates</h2>
+    </div>
+    <p class="group-sub">CO₃ overtone bands near 2.3 and 2.5–2.55 µm. Copper carbonates (malachite, azurite) are included for completeness but are atypical "biomarker" carbonates — flagged below.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Mineral</th><th>Formula</th><th>Sample ID</th><th>Detected Bands (µm)</th><th>Filename</th></tr></thead>
+        <tbody id="carbonate-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="group" id="chart-section">
+    <div class="group-head">
+      <h2 class="group-title">Bands Inside vs. Outside USB4000 Range</h2>
+    </div>
+    <p class="group-sub">Per mineral: how many of its detected bands fall inside the USB4000's 0.20–1.10 µm window versus outside it, grouped into the four HIT classes from Abstract EANA2026-69 (Phyllosilicates, Hydrated Sulfates, Hydrated Silica, Carbonates), sorted by in-range count within each group. A count alone is not a diagnosis — identification needs a specific co-occurring <em>pattern</em> of bands, not just band presence — so read this as "how much raw material the USB4000 would even have to work with," not "which minerals it can identify."</p>
+
+    <div class="notice" style="background: var(--accent-wash); border-left-color: var(--accent); margin: 4px 0 24px;">
+      <strong>44% of the 62 minerals (27 of 62) have zero detected bands inside 0.20–1.10 µm</strong>, and another 26 have exactly one — so 85% of species have at most a single band in range, nowhere near enough for pattern-based identification. Only 9 minerals clear 2 bands, mostly iron-bearing sulfates and phyllosilicates (Fe electronic transitions are genuinely visible in Vis-NIR) — whether even 2 bands is diagnostically sufficient for those species is a literature question, not something this count answers on its own.
+    </div>
+
+    <div class="chart-legend" id="chart-legend"></div>
+
+    <div class="chart-wrap">
+      <svg id="inrange-chart" class="range-svg"></svg>
+    </div>
+  </section>
+
+  <footer>
+    Filenames follow splib07a convention: <code>splib07a_&lt;Mineral&gt;_&lt;SampleID&gt;_&lt;Spectrometer+Purity&gt;_&lt;ProductType&gt;.gif</code> (shown), paired with the identically-named <code>.txt</code> file in <code>ASCIIdata_splib07a/ChapterM_Minerals</code> used for band detection. Instrument ranges per <code>ds1035.pdf</code> Table 1 ("Wavelength and Bandpass Values"): BECK 0.20–3.00 µm, ASD (FR/HR/NG variants) 0.35–2.50 µm.
+  </footer>
+
+</div>
+
+<script>
+const DATA = {"Phyllosilicates": [{"mineral": "Antigorite", "formula": "Mg₃Si₂O₅(OH)₄", "variable": false, "filename": "splib07a_Antigorite_NMNH17958_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.718; 1.393; 1.975; 2.325; 2.784"}, {"mineral": "Beidellite", "formula": "(Na,Ca₀.₅)₀.₃Al₂(Si,Al)₄O₁₀(OH)₂·n(H₂O)", "variable": true, "filename": "splib07a_Beidellite_GDS124_ASDFRb_AREF.gif", "range": "0.35–2.50", "bands": "0.961*; 1.159; 1.409; 1.91; 2.179", "flag": "ASD"}, {"mineral": "Biotite", "formula": "K(Mg,Fe)₃AlSi₃O₁₀(OH,F)₂", "variable": true, "filename": "splib07a_Biotite_HS28.3B_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "2.335; 2.784"}, {"mineral": "Chlorite", "formula": "(Mg,Fe)₃(Si,Al)₄O₁₀(OH)₂·(Mg,Fe)₃(OH)₆", "variable": true, "filename": "splib07a_Chlorite_HS197.3B_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.708; 1.393; 1.985; 2.335"}, {"mineral": "Chrysotile", "formula": "Mg₃Si₂O₅(OH)₄", "variable": false, "filename": "splib07a_Chrysotile_HS323.1B_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.389; 1.945; 2.325"}, {"mineral": "Clinochlore", "formula": "Mg₅Al(Si₃Al)O₁₀(OH)₈", "variable": false, "filename": "splib07a_Clinochlore_Fe_GDS157_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "0.722; 2.345"}, {"mineral": "Clintonite", "formula": "Ca(Mg,Al)₃(Al₃Si)O₁₀(OH)₂", "variable": false, "filename": "splib07a_Clintonite_NMNH126553_BECKc_AREF.gif", "range": "0.20–3.00", "bands": "0.7; 1.053*; 1.732; 2.325; 2.784"}, {"mineral": "Cookeite", "formula": "LiAl₄(Si₃Al)O₁₀(OH)₈", "variable": false, "filename": "splib07a_Cookeite_CAr-1.a_104-150um_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "1.399; 1.585; 2.025; 2.195; 2.365"}, {"mineral": "Corrensite", "formula": "(Mg,Fe)₉(Si,Al)₈O₂₀(OH)₁₀·n(H₂O)", "variable": true, "filename": "splib07a_Corrensite_CorWa-1_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "1.925; 2.88"}, {"mineral": "Cronstedtite", "formula": "Fe²⁺₂Fe³⁺(SiFe³⁺)O₅(OH)₄", "variable": false, "filename": "splib07a_Cronstedtite_M3542_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "2.345"}, {"mineral": "Dickite", "formula": "Al₂Si₂O₅(OH)₄", "variable": false, "filename": "splib07a_Dickite_NMNH106242_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "1.383; 1.413; 1.815*; 2.195; 2.752"}, {"mineral": "Endellite", "formula": "Al₂Si₂O₅(OH)₄·4H₂O", "variable": false, "filename": "splib07a_Endellite_GDS16_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.957*; 1.403; 1.925; 2.195"}, {"mineral": "Glauconite", "formula": "(K,Na)(Fe³⁺,Al,Mg)₂(Si,Al)₄O₁₀(OH)₂", "variable": true, "filename": "splib07a_Glauconite_HS313.3B_BECKc_AREF.gif", "range": "0.20–3.00", "bands": "1.099*; 2.315; 2.848"}, {"mineral": "Halloysite", "formula": "Al₂Si₂O₅(OH)₄", "variable": false, "filename": "splib07a_Halloysite_CM13_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.949; 1.403; 1.915; 2.195; 2.784"}, {"mineral": "Hectorite", "formula": "Na₀.₃(Mg,Li)₃Si₄O₁₀(OH)₂", "variable": false, "filename": "splib07a_Hectorite_SHCa-1_BECKc_AREF.gif", "range": "0.20–3.00", "bands": "1.413; 1.915; 2.315"}, {"mineral": "Illite", "formula": "(K,H₃O)(Al,Mg,Fe)₂(Si,Al)₄O₁₀[(OH)₂,(H₂O)]", "variable": true, "filename": "splib07a_Illite_GDS4_Marblehead_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "1.915; 2.225"}, {"mineral": "Kaolinite", "formula": "Al₂Si₂O₅(OH)₄", "variable": false, "filename": "splib07a_Kaolinite_CM3_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "0.957*; 1.403; 1.925; 2.195; 2.752"}, {"mineral": "Lepidolite", "formula": "K(Li,Al)₃(Si,Al)₄O₁₀(F,OH)₂", "variable": true, "filename": "splib07a_Lepidolite_HS167.3B_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.449; 0.748; 2.195; 2.44; 2.784"}, {"mineral": "Lizardite", "formula": "Mg₃Si₂O₅(OH)₄", "variable": false, "filename": "splib07a_Lizardite_NMNHR4687.a_280um_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.109*; 1.393; 1.985; 2.115; 2.325"}, {"mineral": "Margarite", "formula": "CaAl₂(Al₂Si₂)O₁₀(OH)₂", "variable": false, "filename": "splib07a_Margarite_GDS106_BECKc_AREF.gif", "range": "0.20–3.00", "bands": "0.894; 1.409; 1.995; 2.205; 2.816"}, {"mineral": "Montmorillonite", "formula": "(Na,Ca)₀.₃(Al,Mg)₂Si₄O₁₀(OH)₂·n(H₂O)", "variable": true, "filename": "splib07a_Montmorillonite_CM20_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.957*; 1.153; 1.413; 1.915; 2.215"}, {"mineral": "Muscovite", "formula": "KAl₂(AlSi₃)O₁₀(OH)₂", "variable": false, "filename": "splib07a_Muscovite_GDS107_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "0.894; 1.409; 2.205; 2.44; 2.784"}, {"mineral": "Nacrite", "formula": "Al₂Si₂O₅(OH)₄", "variable": false, "filename": "splib07a_Nacrite_GDS88_BECKc_AREF.gif", "range": "0.20–3.00", "bands": "0.957*; 1.383; 1.413; 2.195; 2.752"}, {"mineral": "Nontronite", "formula": "Na₀.₃Fe³⁺₂(Si,Al)₄O₁₀(OH)₂·n(H₂O)", "variable": true, "filename": "splib07a_Nontronite_NG-1.a_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.638; 0.949; 1.423; 1.915; 2.295"}, {"mineral": "Paragonite", "formula": "NaAl₂(AlSi₃)O₁₀(OH)₂", "variable": false, "filename": "splib07a_Paragonite_GDS109_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.409; 1.925; 2.195; 2.44; 2.784"}, {"mineral": "Phlogopite", "formula": "KMg₃(AlSi₃)O₁₀(OH)₂", "variable": false, "filename": "splib07a_Phlogopite_GDS20_fine_fr_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "1.383; 1.925; 2.325; 2.784"}, {"mineral": "Prochlorite", "formula": "(Mg,Fe)₅Al(Si₃Al)O₁₀(OH)₈", "variable": true, "filename": "splib07a_Prochlorite_SMR-14.a_115um_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "0.704; 2.305"}, {"mineral": "Pyrophyllite", "formula": "Al₂Si₄O₁₀(OH)₂", "variable": false, "filename": "splib07a_Pyrophyllite_PYS1A_fine_gr_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.393; 2.165; 2.335; 2.752"}, {"mineral": "Rectorite", "formula": "NaCaAl₄(Si,Al)₈O₂₀(OH)₄·2H₂O", "variable": false, "filename": "splib07a_Rectorite_ISR202_(RAr-1)_BECKd_AREF.gif", "range": "0.20–3.00", "bands": "1.409; 1.925; 2.195"}, {"mineral": "Roscoelite", "formula": "K(V,Al)₂(AlSi₃)O₁₀(OH)₂", "variable": true, "filename": "splib07a_Roscoelite_EN124_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "1.413; 1.915; 2.215; 2.816"}, {"mineral": "Saponite", "formula": "Ca₀.₂₅(Mg,Fe)₃(Si,Al)₄O₁₀(OH)₂·n(H₂O)", "variable": true, "filename": "splib07a_Saponite_SapCa-1_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.964*; 1.159; 1.399; 1.915; 2.315"}, {"mineral": "Sauconite", "formula": "Na₀.₃Zn₃(Si,Al)₄O₁₀(OH)₂·4H₂O", "variable": true, "filename": "splib07a_Sauconite_GDS135_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.883; 1.159; 1.413; 1.925"}, {"mineral": "Sepiolite", "formula": "Mg₄Si₆O₁₅(OH)₂·6H₂O", "variable": false, "filename": "splib07a_Sepiolite_SepNev-1_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.97*; 1.163; 1.418; 1.915"}, {"mineral": "Serpentine", "formula": "Mg₃Si₂O₅(OH)₄", "variable": false, "filename": "splib07a_Serpentine_HS318.4B_BECKc_AREF.gif", "range": "0.20–3.00", "bands": "0.44; 0.656; 1.399; 1.985; 2.325"}, {"mineral": "Siderophyllite", "formula": "KFe²⁺₂Al(Al₂Si₂)O₁₀(OH)₂", "variable": false, "filename": "splib07a_Siderophyllite_NMNH104998_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.72; 2.375; 2.848"}, {"mineral": "Talc", "formula": "Mg₃Si₄O₁₀(OH)₂", "variable": false, "filename": "splib07a_Talc_GDS23_74-250um_fr_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.393; 1.925; 2.305; 2.4; 2.816"}, {"mineral": "Thuringite", "formula": "(Fe²⁺,Mg)₄(Fe³⁺,Al)₂Si₃AlO₁₀(OH)₈", "variable": true, "filename": "splib07a_Thuringite_SMR-15.a_115um_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "1.083*; 1.403; 2.265; 2.355"}, {"mineral": "Vermiculite", "formula": "(Mg,Fe,Al)₃(Al,Si)₄O₁₀(OH)₂·4H₂O", "variable": true, "filename": "splib07a_Vermiculite_GDS13_Llano_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.438; 1.732; 1.935; 2.816"}], "Hydrated Sulfates": [{"mineral": "Alunite", "formula": "KAl₃(SO₄)₂(OH)₆", "variable": false, "filename": "splib07a_Alunite_AL706_Na100_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "1.438; 1.488; 1.764*; 2.175; 2.496"}, {"mineral": "Epsomite", "formula": "MgSO₄·7H₂O", "variable": false, "filename": "splib07a_Epsomite_GDS149_BECKc_AREF.gif", "range": "0.20–3.00", "bands": "0.37; 0.994*; 1.474; 1.965"}, {"mineral": "Copiapite", "formula": "Fe²⁺Fe³⁺₄(SO₄)₆(OH)₂·20H₂O", "variable": false, "filename": "splib07a_Copiapite_GDS21_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.431; 0.859; 1.955"}, {"mineral": "Coquimbite", "formula": "Fe³⁺₂(SO₄)₃·9H₂O", "variable": false, "filename": "splib07a_Coquimbite_GDS22_BECKc_AREF.gif", "range": "0.20–3.00", "bands": "0.428; 0.762; 1.995"}, {"mineral": "Butlerite", "formula": "Fe³⁺(SO₄)(OH)·2H₂O", "variable": false, "filename": "splib07a_Butlerite_GDS25_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "0.425; 0.933; 1.965"}, {"mineral": "Bloedite", "formula": "Na₂Mg(SO₄)₂·4H₂O", "variable": false, "filename": "splib07a_Bloedite_GDS147_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.478; 1.7; 1.965"}, {"mineral": "Mirabilite", "formula": "Na₂SO₄·10H₂O", "variable": false, "filename": "splib07a_Mirabilite_GDS150_Na2SO4_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.006*; 1.218; 1.463; 1.78*; 1.955"}, {"mineral": "Thenardite", "formula": "Na₂SO₄", "variable": false, "filename": "splib07a_Thenardite_GDS146_BECKc_AREF.gif", "range": "0.20–3.00", "bands": "1.423; 1.945; 2.115"}, {"mineral": "Polyhalite", "formula": "K₂Ca₂Mg(SO₄)₄·2H₂O", "variable": false, "filename": "splib07a_Polyhalite_NMNH92669-4_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.218; 1.484; 1.965; 2.235; 2.418"}, {"mineral": "Syngenite", "formula": "K₂Ca(SO₄)₂·H₂O", "variable": false, "filename": "splib07a_Syngenite_GDS139_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "0.859; 1.577; 1.995; 2.075; 2.185"}, {"mineral": "Eugsterite", "formula": "Na₄Ca(SO₄)₃·2H₂O", "variable": false, "filename": "splib07a_Eugsterite_GDS140_Syn_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "1.438; 1.945"}, {"mineral": "Kainite", "formula": "KMg(SO₄)Cl·3H₂O", "variable": false, "filename": "splib07a_Kainite_NMNH83904_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.018*; 1.218; 1.484; 1.788*; 1.985"}, {"mineral": "Mascagnite", "formula": "(NH₄)₂SO₄", "variable": false, "filename": "splib07a_Mascagnite_GDS65.a_(coarse)_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.063*; 1.279; 1.571; 2.215"}], "Hydrated Silica": [{"mineral": "Opal", "formula": "SiO₂·nH₂O", "variable": false, "filename": "splib07a_Opal_TM8896_(Hyalite)_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.153; 1.409; 1.915; 2.245"}, {"mineral": "Chalcedony", "formula": "SiO₂", "variable": false, "filename": "splib07a_Chalcedony_CU91-6A_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.423; 1.925; 2.245"}], "Carbonates": [{"mineral": "Calcite", "formula": "CaCO₃", "variable": false, "filename": "splib07a_Calcite_CO2004_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "1.453; 1.985; 2.335; 2.528; 2.848"}, {"mineral": "Dolomite", "formula": "CaMg(CO₃)₂", "variable": false, "filename": "splib07a_Dolomite_COD2005_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "1.028*; 1.965; 2.315; 2.496"}, {"mineral": "Aragonite", "formula": "CaCO₃", "variable": false, "filename": "splib07a_Aragonite_GDS1073_ASDNGc_AREF.gif", "range": "0.35–2.50", "bands": "1.463; 1.94; 2.317", "flag": "ASD"}, {"mineral": "Siderite", "formula": "FeCO₃", "variable": false, "filename": "splib07a_Siderite_HS271.3B_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.034*; 1.945; 2.335; 2.528"}, {"mineral": "Rhodochrosite", "formula": "MnCO₃", "variable": false, "filename": "splib07a_Rhodochrosite_HS338.3B_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.407; 0.549; 1.068*; 2.355; 2.528"}, {"mineral": "Witherite", "formula": "BaCO₃", "variable": false, "filename": "splib07a_Witherite_HS273.3B_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "1.925; 2.035; 2.375; 2.56; 2.912"}, {"mineral": "Strontianite", "formula": "SrCO₃", "variable": false, "filename": "splib07a_Strontianite_HS272.3B_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "1.885; 2.005; 2.345; 2.528; 2.88"}, {"mineral": "Malachite", "formula": "Cu₂CO₃(OH)₂", "variable": false, "filename": "splib07a_Malachite_HS254.3B_BECKb_AREF.gif", "range": "0.20–3.00", "bands": "0.822; 2.275; 2.375", "flag": "Cu-carb."}, {"mineral": "Azurite", "formula": "Cu₃(CO₃)₂(OH)₂", "variable": false, "filename": "splib07a_Azurite_WS316_BECKa_AREF.gif", "range": "0.20–3.00", "bands": "0.654; 1.498; 1.732; 2.045; 2.355", "flag": "Cu-carb."}]};
+
+function parseRow(f) {
+  const base = f.replace(/^splib07a_/, '').replace(/\.gif$/, '');
+  const parts = base.split('_');
+  const mineral = parts[0];
+  const rest = parts.slice(1, -2).join('_');
+  return { mineral, sampleId: rest || '—' };
+}
+
+function formatBands(bands) {
+  return bands
+    .split(';')
+    .map(b => b.trim())
+    .map(b => b.endsWith('*') ? `${b.slice(0, -1)}<span class="splice-mark">*</span>` : b)
+    .join(', ');
+}
+
+function renderTable(tbodyId, entries) {
+  const tbody = document.getElementById(tbodyId);
+  entries.forEach(({ mineral, formula, variable, filename, range, bands, flag }) => {
+    const { sampleId } = parseRow(filename);
+    const tr = document.createElement('tr');
+    if (flag) tr.className = 'flagged';
+    tr.innerHTML = `
+      <td class="mineral">${mineral}${flag ? `<span class="flag">${flag}</span>` : ''}</td>
+      <td class="formula">${formula}${variable ? `<span class="variable-mark" title="Variable composition (solid solution) — formula shown is a representative form">v</span>` : ''}</td>
+      <td>${sampleId}</td>
+      <td class="bands">${formatBands(bands)}</td>
+      <td class="filename">${filename}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+renderTable('phyllo-body', DATA['Phyllosilicates']);
+renderTable('sulfate-body', DATA['Hydrated Sulfates']);
+renderTable('silica-body', DATA['Hydrated Silica']);
+renderTable('carbonate-body', DATA['Carbonates']);
+
+/* ============ range & histogram charts ============ */
+
+const INRANGE_DATA = [{"mineral": "Clintonite", "group": "Phyllosilicates", "total": 5, "in_range": 2, "out_range": 3, "in_range_vals": [0.7, 1.053], "out_range_vals": [1.732, 2.325, 2.784]}, {"mineral": "Lepidolite", "group": "Phyllosilicates", "total": 5, "in_range": 2, "out_range": 3, "in_range_vals": [0.449, 0.748], "out_range_vals": [2.195, 2.44, 2.784]}, {"mineral": "Nontronite", "group": "Phyllosilicates", "total": 5, "in_range": 2, "out_range": 3, "in_range_vals": [0.638, 0.949], "out_range_vals": [1.423, 1.915, 2.295]}, {"mineral": "Serpentine", "group": "Phyllosilicates", "total": 5, "in_range": 2, "out_range": 3, "in_range_vals": [0.44, 0.656], "out_range_vals": [1.399, 1.985, 2.325]}, {"mineral": "Antigorite", "group": "Phyllosilicates", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [0.718], "out_range_vals": [1.393, 1.975, 2.325, 2.784]}, {"mineral": "Beidellite", "group": "Phyllosilicates", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [0.961], "out_range_vals": [1.159, 1.409, 1.91, 2.179]}, {"mineral": "Chlorite", "group": "Phyllosilicates", "total": 4, "in_range": 1, "out_range": 3, "in_range_vals": [0.708], "out_range_vals": [1.393, 1.985, 2.335]}, {"mineral": "Clinochlore", "group": "Phyllosilicates", "total": 2, "in_range": 1, "out_range": 1, "in_range_vals": [0.722], "out_range_vals": [2.345]}, {"mineral": "Endellite", "group": "Phyllosilicates", "total": 4, "in_range": 1, "out_range": 3, "in_range_vals": [0.957], "out_range_vals": [1.403, 1.925, 2.195]}, {"mineral": "Glauconite", "group": "Phyllosilicates", "total": 3, "in_range": 1, "out_range": 2, "in_range_vals": [1.099], "out_range_vals": [2.315, 2.848]}, {"mineral": "Halloysite", "group": "Phyllosilicates", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [0.949], "out_range_vals": [1.403, 1.915, 2.195, 2.784]}, {"mineral": "Kaolinite", "group": "Phyllosilicates", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [0.957], "out_range_vals": [1.403, 1.925, 2.195, 2.752]}, {"mineral": "Margarite", "group": "Phyllosilicates", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [0.894], "out_range_vals": [1.409, 1.995, 2.205, 2.816]}, {"mineral": "Montmorillonite", "group": "Phyllosilicates", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [0.957], "out_range_vals": [1.153, 1.413, 1.915, 2.215]}, {"mineral": "Muscovite", "group": "Phyllosilicates", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [0.894], "out_range_vals": [1.409, 2.205, 2.44, 2.784]}, {"mineral": "Nacrite", "group": "Phyllosilicates", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [0.957], "out_range_vals": [1.383, 1.413, 2.195, 2.752]}, {"mineral": "Prochlorite", "group": "Phyllosilicates", "total": 2, "in_range": 1, "out_range": 1, "in_range_vals": [0.704], "out_range_vals": [2.305]}, {"mineral": "Saponite", "group": "Phyllosilicates", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [0.964], "out_range_vals": [1.159, 1.399, 1.915, 2.315]}, {"mineral": "Sauconite", "group": "Phyllosilicates", "total": 4, "in_range": 1, "out_range": 3, "in_range_vals": [0.883], "out_range_vals": [1.159, 1.413, 1.925]}, {"mineral": "Sepiolite", "group": "Phyllosilicates", "total": 4, "in_range": 1, "out_range": 3, "in_range_vals": [0.97], "out_range_vals": [1.163, 1.418, 1.915]}, {"mineral": "Siderophyllite", "group": "Phyllosilicates", "total": 3, "in_range": 1, "out_range": 2, "in_range_vals": [0.72], "out_range_vals": [2.375, 2.848]}, {"mineral": "Thuringite", "group": "Phyllosilicates", "total": 4, "in_range": 1, "out_range": 3, "in_range_vals": [1.083], "out_range_vals": [1.403, 2.265, 2.355]}, {"mineral": "Biotite", "group": "Phyllosilicates", "total": 2, "in_range": 0, "out_range": 2, "in_range_vals": [], "out_range_vals": [2.335, 2.784]}, {"mineral": "Chrysotile", "group": "Phyllosilicates", "total": 3, "in_range": 0, "out_range": 3, "in_range_vals": [], "out_range_vals": [1.389, 1.945, 2.325]}, {"mineral": "Cookeite", "group": "Phyllosilicates", "total": 5, "in_range": 0, "out_range": 5, "in_range_vals": [], "out_range_vals": [1.399, 1.585, 2.025, 2.195, 2.365]}, {"mineral": "Corrensite", "group": "Phyllosilicates", "total": 2, "in_range": 0, "out_range": 2, "in_range_vals": [], "out_range_vals": [1.925, 2.88]}, {"mineral": "Cronstedtite", "group": "Phyllosilicates", "total": 1, "in_range": 0, "out_range": 1, "in_range_vals": [], "out_range_vals": [2.345]}, {"mineral": "Dickite", "group": "Phyllosilicates", "total": 5, "in_range": 0, "out_range": 5, "in_range_vals": [], "out_range_vals": [1.383, 1.413, 1.815, 2.195, 2.752]}, {"mineral": "Hectorite", "group": "Phyllosilicates", "total": 3, "in_range": 0, "out_range": 3, "in_range_vals": [], "out_range_vals": [1.413, 1.915, 2.315]}, {"mineral": "Illite", "group": "Phyllosilicates", "total": 2, "in_range": 0, "out_range": 2, "in_range_vals": [], "out_range_vals": [1.915, 2.225]}, {"mineral": "Lizardite", "group": "Phyllosilicates", "total": 5, "in_range": 0, "out_range": 5, "in_range_vals": [], "out_range_vals": [1.109, 1.393, 1.985, 2.115, 2.325]}, {"mineral": "Paragonite", "group": "Phyllosilicates", "total": 5, "in_range": 0, "out_range": 5, "in_range_vals": [], "out_range_vals": [1.409, 1.925, 2.195, 2.44, 2.784]}, {"mineral": "Phlogopite", "group": "Phyllosilicates", "total": 4, "in_range": 0, "out_range": 4, "in_range_vals": [], "out_range_vals": [1.383, 1.925, 2.325, 2.784]}, {"mineral": "Pyrophyllite", "group": "Phyllosilicates", "total": 4, "in_range": 0, "out_range": 4, "in_range_vals": [], "out_range_vals": [1.393, 2.165, 2.335, 2.752]}, {"mineral": "Rectorite", "group": "Phyllosilicates", "total": 3, "in_range": 0, "out_range": 3, "in_range_vals": [], "out_range_vals": [1.409, 1.925, 2.195]}, {"mineral": "Roscoelite", "group": "Phyllosilicates", "total": 4, "in_range": 0, "out_range": 4, "in_range_vals": [], "out_range_vals": [1.413, 1.915, 2.215, 2.816]}, {"mineral": "Talc", "group": "Phyllosilicates", "total": 5, "in_range": 0, "out_range": 5, "in_range_vals": [], "out_range_vals": [1.393, 1.925, 2.305, 2.4, 2.816]}, {"mineral": "Vermiculite", "group": "Phyllosilicates", "total": 4, "in_range": 0, "out_range": 4, "in_range_vals": [], "out_range_vals": [1.438, 1.732, 1.935, 2.816]}, {"mineral": "Butlerite", "group": "Hydrated Sulfates", "total": 3, "in_range": 2, "out_range": 1, "in_range_vals": [0.425, 0.933], "out_range_vals": [1.965]}, {"mineral": "Copiapite", "group": "Hydrated Sulfates", "total": 3, "in_range": 2, "out_range": 1, "in_range_vals": [0.431, 0.859], "out_range_vals": [1.955]}, {"mineral": "Coquimbite", "group": "Hydrated Sulfates", "total": 3, "in_range": 2, "out_range": 1, "in_range_vals": [0.428, 0.762], "out_range_vals": [1.995]}, {"mineral": "Epsomite", "group": "Hydrated Sulfates", "total": 4, "in_range": 2, "out_range": 2, "in_range_vals": [0.37, 0.994], "out_range_vals": [1.474, 1.965]}, {"mineral": "Kainite", "group": "Hydrated Sulfates", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [1.018], "out_range_vals": [1.218, 1.484, 1.788, 1.985]}, {"mineral": "Mascagnite", "group": "Hydrated Sulfates", "total": 4, "in_range": 1, "out_range": 3, "in_range_vals": [1.063], "out_range_vals": [1.279, 1.571, 2.215]}, {"mineral": "Mirabilite", "group": "Hydrated Sulfates", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [1.006], "out_range_vals": [1.218, 1.463, 1.78, 1.955]}, {"mineral": "Syngenite", "group": "Hydrated Sulfates", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [0.859], "out_range_vals": [1.577, 1.995, 2.075, 2.185]}, {"mineral": "Alunite", "group": "Hydrated Sulfates", "total": 5, "in_range": 0, "out_range": 5, "in_range_vals": [], "out_range_vals": [1.438, 1.488, 1.764, 2.175, 2.496]}, {"mineral": "Bloedite", "group": "Hydrated Sulfates", "total": 3, "in_range": 0, "out_range": 3, "in_range_vals": [], "out_range_vals": [1.478, 1.7, 1.965]}, {"mineral": "Eugsterite", "group": "Hydrated Sulfates", "total": 2, "in_range": 0, "out_range": 2, "in_range_vals": [], "out_range_vals": [1.438, 1.945]}, {"mineral": "Polyhalite", "group": "Hydrated Sulfates", "total": 5, "in_range": 0, "out_range": 5, "in_range_vals": [], "out_range_vals": [1.218, 1.484, 1.965, 2.235, 2.418]}, {"mineral": "Thenardite", "group": "Hydrated Sulfates", "total": 3, "in_range": 0, "out_range": 3, "in_range_vals": [], "out_range_vals": [1.423, 1.945, 2.115]}, {"mineral": "Chalcedony", "group": "Hydrated Silica", "total": 3, "in_range": 0, "out_range": 3, "in_range_vals": [], "out_range_vals": [1.423, 1.925, 2.245]}, {"mineral": "Opal", "group": "Hydrated Silica", "total": 4, "in_range": 0, "out_range": 4, "in_range_vals": [], "out_range_vals": [1.153, 1.409, 1.915, 2.245]}, {"mineral": "Rhodochrosite", "group": "Carbonates", "total": 5, "in_range": 3, "out_range": 2, "in_range_vals": [0.407, 0.549, 1.068], "out_range_vals": [2.355, 2.528]}, {"mineral": "Azurite", "group": "Carbonates", "total": 5, "in_range": 1, "out_range": 4, "in_range_vals": [0.654], "out_range_vals": [1.498, 1.732, 2.045, 2.355]}, {"mineral": "Dolomite", "group": "Carbonates", "total": 4, "in_range": 1, "out_range": 3, "in_range_vals": [1.028], "out_range_vals": [1.965, 2.315, 2.496]}, {"mineral": "Malachite", "group": "Carbonates", "total": 3, "in_range": 1, "out_range": 2, "in_range_vals": [0.822], "out_range_vals": [2.275, 2.375]}, {"mineral": "Siderite", "group": "Carbonates", "total": 4, "in_range": 1, "out_range": 3, "in_range_vals": [1.034], "out_range_vals": [1.945, 2.335, 2.528]}, {"mineral": "Aragonite", "group": "Carbonates", "total": 3, "in_range": 0, "out_range": 3, "in_range_vals": [], "out_range_vals": [1.463, 1.94, 2.317]}, {"mineral": "Calcite", "group": "Carbonates", "total": 5, "in_range": 0, "out_range": 5, "in_range_vals": [], "out_range_vals": [1.453, 1.985, 2.335, 2.528, 2.848]}, {"mineral": "Strontianite", "group": "Carbonates", "total": 5, "in_range": 0, "out_range": 5, "in_range_vals": [], "out_range_vals": [1.885, 2.005, 2.345, 2.528, 2.88]}, {"mineral": "Witherite", "group": "Carbonates", "total": 5, "in_range": 0, "out_range": 5, "in_range_vals": [], "out_range_vals": [1.925, 2.035, 2.375, 2.56, 2.912]}];
+
+const RANGE_COLOR = '#3987e5';   // in-range (USB4000-visible) — blue
+const OUT_COLOR = '#5a6478';     // out-of-range — recessive neutral, not a competing hue
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs) {
+  const el = document.createElementNS(SVG_NS, tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+
+// shared tooltip
+const tooltip = document.createElement('div');
+tooltip.className = 'chart-tooltip';
+document.body.appendChild(tooltip);
+function showTooltip(evt, html) {
+  tooltip.innerHTML = html;
+  tooltip.classList.add('visible');
+  moveTooltip(evt);
+}
+function moveTooltip(evt) {
+  const pad = 14;
+  let x = evt.clientX + pad;
+  let y = evt.clientY + pad;
+  const rect = tooltip.getBoundingClientRect();
+  if (x + rect.width > window.innerWidth - 8) x = evt.clientX - rect.width - pad;
+  if (y + rect.height > window.innerHeight - 8) y = evt.clientY - rect.height - pad;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+function hideTooltip() {
+  tooltip.classList.remove('visible');
+}
+
+function renderLegend() {
+  const el = document.getElementById('chart-legend');
+  const items = [
+    { label: 'Bands inside USB4000 range (0.20–1.10 µm)', color: RANGE_COLOR },
+    { label: 'Bands outside USB4000 range', color: OUT_COLOR },
+  ];
+  items.forEach(it => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `<span class="legend-swatch" style="background:${it.color}"></span>${it.label}`;
+    el.appendChild(item);
+  });
+}
+renderLegend();
+
+/* ---- stacked bar: in-range vs out-of-range band count, grouped by HIT class ---- */
+function renderInRangeChart() {
+  const svg = document.getElementById('inrange-chart');
+  // group first (matches the abstract's four HIT classes, contiguous blocks),
+  // then by in_range count descending within each group, then by name
+  const GROUP_ORDER = ['Phyllosilicates', 'Hydrated Sulfates', 'Hydrated Silica', 'Carbonates'];
+  const rows = [...INRANGE_DATA].sort((a, b) => {
+    if (GROUP_ORDER.indexOf(a.group) !== GROUP_ORDER.indexOf(b.group)) {
+      return GROUP_ORDER.indexOf(a.group) - GROUP_ORDER.indexOf(b.group);
+    }
+    if (b.in_range !== a.in_range) return b.in_range - a.in_range;
+    return a.mineral.localeCompare(b.mineral);
+  });
+
+  const marginTop = 20, marginBottom = 40, marginLeft = 168, marginRight = 40;
+  const rowH = 15, groupGap = 16;
+  const plotW = 560;
+  const maxTotal = Math.max(...rows.map(r => r.total));
+
+  // compute y position per row, with a gap inserted between groups
+  let y = marginTop;
+  let lastGroup = null;
+  const positions = [];
+  const groupBounds = {};
+  rows.forEach((r) => {
+    if (lastGroup !== null && r.group !== lastGroup) y += groupGap;
+    if (!groupBounds[r.group]) groupBounds[r.group] = { start: y };
+    groupBounds[r.group].end = y;
+    positions.push(y);
+    y += rowH;
+    lastGroup = r.group;
+  });
+  const plotBottom = y;
+  const totalW = marginLeft + plotW + marginRight;
+  const totalH = plotBottom + marginBottom;
+
+  svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+  svg.innerHTML = '';
+
+  const xScale = v => marginLeft + (v / maxTotal) * plotW;
+
+  // x gridlines (integer counts)
+  for (let v = 0; v <= maxTotal; v++) {
+    const x = xScale(v);
+    svg.appendChild(svgEl('line', {
+      x1: x, x2: x, y1: marginTop - 4, y2: plotBottom,
+      class: 'chart-gridline',
+    }));
+    const lbl = svgEl('text', { x, y: plotBottom + 16, class: 'chart-axis-label', 'text-anchor': 'middle' });
+    lbl.textContent = v;
+    svg.appendChild(lbl);
+  }
+  const xAxisLabel = svgEl('text', { x: marginLeft + plotW / 2, y: totalH - 6, class: 'chart-axis-label', 'text-anchor': 'middle' });
+  xAxisLabel.textContent = 'Detected bands';
+
+  // HIT class labels (left edge, colored by group, matching the earlier legend logic)
+  const GROUP_TEXT_COLOR = {
+    'Phyllosilicates': '#66a3ef',
+    'Hydrated Sulfates': '#e58a5c',
+    'Hydrated Silica': '#4fc38f',
+    'Carbonates': '#dba43a',
+  };
+  GROUP_ORDER.forEach(g => {
+    const b = groupBounds[g];
+    if (!b) return;
+    const midY = (b.start + b.end) / 2 + rowH / 2;
+    const lbl = svgEl('text', {
+      x: 8, y: midY, class: 'group-tick-label', 'text-anchor': 'start',
+      fill: GROUP_TEXT_COLOR[g] || 'var(--muted)',
+    });
+    lbl.textContent = g;
+    svg.appendChild(lbl);
+  });
+  svg.appendChild(xAxisLabel);
+
+  rows.forEach((r, i) => {
+    const rowY = positions[i];
+    const cy = rowY + rowH / 2;
+    const barH = 10;
+    const barY = cy - barH / 2;
+
+    const g = svgEl('g', { class: 'inrange-row' });
+
+    const label = svgEl('text', {
+      x: marginLeft - 10, y: cy + 4, class: 'row-label', 'text-anchor': 'end',
+    });
+    label.textContent = r.mineral;
+    g.appendChild(label);
+
+    // in-range segment
+    const inW = (r.in_range / maxTotal) * plotW;
+    if (r.in_range > 0) {
+      g.appendChild(svgEl('rect', {
+        x: marginLeft, y: barY, width: Math.max(inW - 1, 0), height: barH,
+        fill: RANGE_COLOR, rx: 2,
+      }));
+    }
+    // out-of-range segment (2px surface gap from in-range segment)
+    const outX = marginLeft + inW + (r.in_range > 0 && r.out_range > 0 ? 2 : 0);
+    const outW = (r.out_range / maxTotal) * plotW;
+    if (r.out_range > 0) {
+      g.appendChild(svgEl('rect', {
+        x: outX, y: barY, width: Math.max(outW - 1, 0), height: barH,
+        fill: OUT_COLOR, rx: 2,
+      }));
+    }
+
+    const hit = svgEl('rect', {
+      x: marginLeft - 160, y: rowY, width: plotW + 160, height: rowH, fill: 'transparent',
+    });
+    hit.style.cursor = 'pointer';
+    hit.addEventListener('mousemove', (evt) => {
+      label.classList.add('row-label-hover');
+      const inStr = r.in_range_vals.length ? r.in_range_vals.map(v => v.toFixed(3)).join(', ') : '—';
+      const outStr = r.out_range_vals.length ? r.out_range_vals.map(v => v.toFixed(3)).join(', ') : '—';
+      showTooltip(evt, `<div class="tt-title">${r.mineral}</div>
+        <div class="tt-row">${r.group}</div>
+        <div class="tt-row">In range (${r.in_range}): ${inStr}</div>
+        <div class="tt-row">Out of range (${r.out_range}): ${outStr}</div>`);
+    });
+    hit.addEventListener('mouseleave', () => {
+      label.classList.remove('row-label-hover');
+      hideTooltip();
+    });
+    g.appendChild(hit);
+
+    svg.appendChild(g);
+  });
+}
+renderInRangeChart();
+</script>
