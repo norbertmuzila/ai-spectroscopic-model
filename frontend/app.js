@@ -12,9 +12,27 @@ const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g,
   (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const cssvar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
+/* When the console is password-protected the server injects a session token
+   into this page, and every request below carries it explicitly. Relying on
+   the browser to replay the password it was given at sign-in does not work:
+   browsers are inconsistent about attaching cached HTTP credentials to
+   background fetches, and a request that went out without them came back as
+   a login challenge - a second password prompt the moment Connect was
+   pressed. */
+const TOKEN = window.__SPECTRO_TOKEN__ || null;
+
+function withAuth(headers) {
+  const h = Object.assign({}, headers || {});
+  if (TOKEN) h["X-Spectro-Token"] = TOKEN;
+  return h;
+}
+
 async function api(path, opts) {
-  const res = await fetch(path, Object.assign(
-    { headers: { "Content-Type": "application/json" } }, opts || {}));
+  const o = opts || {};
+  const res = await fetch(path, Object.assign({}, o, {
+    credentials: "same-origin",
+    headers: withAuth(Object.assign({ "Content-Type": "application/json" }, o.headers || {})),
+  }));
   let body = null;
   try { body = await res.json(); } catch (e) { /* no body */ }
   if (!res.ok) {
@@ -697,7 +715,10 @@ $("file-input").onchange = async (ev) => {
   if (!file) return;
   const fd = new FormData(); fd.append("file", file);
   try {
-    const res = await fetch("/api/import", { method: "POST", body: fd });
+    // No Content-Type here: the browser must set the multipart boundary itself.
+    const res = await fetch("/api/import", {
+      method: "POST", body: fd, credentials: "same-origin", headers: withAuth(),
+    });
     const body = await res.json();
     if (!res.ok) throw new Error(body.detail || res.statusText);
     S.analysis = body; renderAll(); refreshHistory();
@@ -706,9 +727,35 @@ $("file-input").onchange = async (ev) => {
   ev.target.value = "";
 };
 
-const dl = (fmt) => () => {
+/* Downloads go through fetch rather than a page navigation, so they carry the
+   same token as every other request. A plain navigation depends on the
+   browser's cached credentials - exactly what failed for Connect - and the
+   token is deliberately not put in the URL, where it would land in server
+   logs and browser history. */
+async function download(url, fallbackName) {
+  const res = await fetch(url, { credentials: "same-origin", headers: withAuth() });
+  if (!res.ok) {
+    let detail = res.statusText;
+    try { detail = (await res.json()).detail || detail; } catch (e) { /* not json */ }
+    throw new Error(detail);
+  }
+  const blob = await res.blob();
+  const cd = res.headers.get("Content-Disposition") || "";
+  const m = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(cd);
+  const name = m ? decodeURIComponent(m[1]) : fallbackName;
+  const href = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = href; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(href), 5000);
+}
+
+const dl = (fmt) => async () => {
   if (!S.analysis) return;
-  window.location = `/api/report/${S.analysis.analysis_id}/download?fmt=${fmt}`;
+  const id = S.analysis.analysis_id;
+  try {
+    await download(`/api/report/${id}/download?fmt=${fmt}`, `${id}.${fmt}`);
+  } catch (e) { toast("Download failed: " + e.message, "bad"); }
 };
 $("btn-pdf").onclick = dl("pdf");
 $("btn-csv").onclick = dl("csv");
@@ -724,7 +771,8 @@ $("btn-session-pdf").onclick = async () => {
   if (!S.sessionId) { toast("No active session"); return; }
   try {
     await api("/api/report/session/" + S.sessionId, { method: "POST" });
-    window.location = `/api/report/session/${S.sessionId}/download`;
+    await download(`/api/report/session/${S.sessionId}/download`,
+                   `session_${S.sessionId}.pdf`);
   } catch (e) { toast(e.message, "bad"); }
 };
 $("btn-refresh").onclick = refreshHistory;

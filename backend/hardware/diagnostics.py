@@ -174,8 +174,17 @@ def _dashboard_holds_device(port: int = 8000, timeout: float = 2.0) -> bool:
     import json
     import urllib.request
     try:
-        with urllib.request.urlopen(
-                f"http://127.0.0.1:{port}/api/status", timeout=timeout) as r:
+        # With a password configured, an unauthenticated request here always
+        # gets a 401, this check always answers "no", and the diagnosis then
+        # blames some other program for holding a device the dashboard owns.
+        headers = {}
+        from backend import auth as authmod
+        pw = authmod.password()
+        if pw:
+            headers[authmod.HEADER] = pw
+        req = urllib.request.Request(f"http://127.0.0.1:{port}/api/status",
+                                     headers=headers)
+        with urllib.request.urlopen(req, timeout=timeout) as r:
             st = json.loads(r.read().decode("utf-8"))
         return bool(st.get("connected")) and not st.get("device", {}).get("simulated", True)
     except Exception:

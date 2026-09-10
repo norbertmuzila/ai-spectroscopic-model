@@ -129,12 +129,18 @@ async def middleware(request: Request, call_next):
             return await call_next(request)
         return JSONResponse({"detail": "unauthorized"}, status_code=401)
 
+    # API routes answer 401 *without* a WWW-Authenticate challenge. That header
+    # is what makes a browser pop its login dialog, and on an API route the
+    # request is almost always a background fetch from the dashboard - so the
+    # challenge surfaced as a second password prompt the moment the operator
+    # pressed Connect, even though they had signed in seconds earlier. The page
+    # itself (below) still challenges, which is the one place a prompt belongs;
+    # the dashboard authenticates its own requests with the token the page
+    # carries, and reports a plain 401 as "sign in required" if it ever sees one.
     if path.startswith("/api/"):
         return JSONResponse(
-            {"detail": "Authentication required. Use the password shown in the "
-                       "terminal that started the tunnel."},
+            {"detail": "Authentication required. Reload the page and sign in."},
             status_code=401,
-            headers={"WWW-Authenticate": 'Basic realm="Spectral Console"'},
         )
 
     return Response(
